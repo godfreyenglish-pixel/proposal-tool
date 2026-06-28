@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Rivertown Solar — Energy &amp; Investment Briefing</title>
+<script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<style>
+  html, body { margin: 0; padding: 0; background: #F4EFDF; }
+  #root { min-height: 100vh; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel" data-presets="react">
+const { useState, useMemo } = React;
+
+/*
+  RIVERTOWN SOLAR — INTERACTIVE PROPOSAL ENGINE (PHASE 1) · JPM INSTITUTIONAL SKIN
+  ------------------------------------------------------------------
+  Layer 1 only: deterministic math + charts. No Claude API.
+  calcEngine() is UNCHANGED from the dark build — only presentation differs.
+
+  PHASE 2 HOOK: calcEngine() output (`e`) is the payload passed to Claude
+  for narration later. Claude READS these numbers, never recomputes them.
+
+  Locked constraints: Federal ITC $0 (expired) · NYSERDA double-count guard
+  · 80% DOD usable · no commission lines · no AI footprint client-facing.
+*/
+
+const T = {
+  bg: "#F4EFDF",        // cream
+  row: "#EDE7D2",       // highlighted row
+  navy: "#0F2A4F",
+  burgundy: "#7E1C2C",
+  gold: "#B89968",
+  text: "#1A1A1A",
+  sub: "#4A4A4A",
+  muted: "#6E6E6E",
+  border: "#C9BD9D",
+  subtle: "#D8CFB4",
+  // muted chart palette
+  cSlate: "#5A6F8A",
+  cSage: "#8B9D6E",
+  cForest: "#3D5C3F",
+  cBurg: "#7E1C2C",
+};
+const serif = "'Georgia', 'Times New Roman', serif";
+const sans = "'Helvetica', Arial, sans-serif";
+
+const money = (n) => "$" + Math.round(n).toLocaleString("en-US");
+const pct = (n) => Math.round(n * 100) + "%";
+const yr = (n) => (n <= 0 ? "—" : n.toFixed(1) + " yrs");
+
+/* PHASE 2: paste your deployed worker URL here after `wrangler deploy` */
+const WORKER_URL = "https://rivertown-narration.raspy-lake-f7d3.workers.dev";
+
+async function fetchNarration(e, cfg) {
+  try {
+    const r = await fetch(WORKER_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ e, cfg }),
+    });
+    const data = await r.json();
+    return data.narration || null;
+  } catch {
+    return null; // falls back to hardcoded thesis
+  }
+}
+
+/* ============================================================
+   LAYER 1 ENGINE — identical to dark build, deterministic
+   ============================================================ */
+function calcEngine(c) {
+  const batteryOnly = c.mode === "battery";
+  const annualBill = c.monthlyBill * 12;
+
+  // Battery-only: no solar generation, no offset, no solar savings.
+  const offsetFrac = batteryOnly
+    ? 0
+    : c.offsetPct != null
+      ? c.offsetPct / 100
+      : c.annualUsage > 0
+      ? Math.min(c.annualProduction / c.annualUsage, 1)
+      : 0;
+  const solarSavings = offsetFrac * annualBill;
+
+  const usableKwh = c.batteryKwh * c.batteryQty * 0.8;
+  const windowDraw = c.eveningDrawKw * c.peakWindowHours;
+  const shiftedKwh = Math.min(usableKwh, windowDraw);
+  const spread = Math.max(c.peakRate - c.offPeakRate, 0);
+  const dailyArb = shiftedKwh * spread;
+  const SEASONAL = 0.85;
+  const touSavings = c.batteryQty > 0 && c.mode !== "solar" ? dailyArb * 365 * SEASONAL : 0;
+
+  const nyserdaApplied = c.nyserdaPreApplied ? 0 : c.nyserda;
+  // IT-255: a standalone battery retrofit does NOT qualify for the NY State
+  // solar equipment credit. Force $0 in battery-only mode.
+  const nyStateCredit = batteryOnly ? 0 : c.nyStateCredit;
+  const netCost = c.grossPrice - nyserdaApplied - nyStateCredit;
+  const totalAnnual = solarSavings + touSavings;
+  const payback = totalAnnual > 0 ? netCost / totalAnnual : 0;
+  const ESC = 0.03;
+  let lifetime = 0;
+  let running = totalAnnual;
+  for (let i = 0; i < 25; i++) {
+    lifetime += running;
+    running *= 1 + ESC;
+  }
+  lifetime -= netCost;
+  return {
+    batteryOnly, solarOnly: c.mode === "solar", annualBill, offsetFrac, solarSavings,
+    usableKwh, windowDraw, shiftedKwh, spread, touSavings, netCost, nyserdaApplied,
+    nyStateCredit, totalAnnual, payback, lifetime,
+  };
+}
+
+/* ============================================================
+   Charts — muted JPM palette
+   ============================================================ */
+function BarPair({ before, after }) {
+  const max = Math.max(before, after, 1);
+  const h = 120;
+  const bh = (v) => Math.max((v / max) * h, 2);
+  const bars = [
+    { x: 40, v: before, c: T.cBurg, l: "Current Annual" },
+    { x: 120, v: after, c: T.cForest, l: "With System" },
+  ];
+  return (
+    <svg viewBox="0 0 200 170" style={{ width: "100%", height: 170 }}>
+      {bars.map((b, i) => (
+        <g key={i}>
+          <rect x={b.x} y={20 + (h - bh(b.v))} width="40" height={bh(b.v)} fill={b.c} />
+          <text x={b.x + 20} y={14} fill={T.text} fontSize="11" fontFamily={serif} textAnchor="middle">
+            {money(b.v)}
+          </text>
+          <text x={b.x + 20} y={158} fill={T.muted} fontSize="8" fontFamily={sans} letterSpacing="1" textAnchor="middle">
+            {b.l.toUpperCase()}
+          </text>
+        </g>
+      ))}
+    </svg>
+  );
+}
+
+function OffsetRing({ frac }) {
+  const r = 52;
+  const circ = 2 * Math.PI * r;
+  const dash = circ * Math.min(frac, 1);
+  return (
+    <svg viewBox="0 0 140 140" style={{ width: 130, height: 130 }}>
+      <circle cx="70" cy="70" r={r} fill="none" stroke={T.subtle} strokeWidth="12" />
+      <circle cx="70" cy="70" r={r} fill="none" stroke={T.navy} strokeWidth="12"
+        strokeDasharray={`${dash} ${circ}`} strokeLinecap="butt" transform="rotate(-90 70 70)" />
+      <text x="70" y="68" fill={T.navy} fontSize="26" fontFamily={serif} fontWeight="400" textAnchor="middle">
+        {pct(frac)}
+      </text>
+      <text x="70" y="88" fill={T.muted} fontSize="8" fontFamily={sans} letterSpacing="2" textAnchor="middle">
+        OFFSET
+      </text>
+    </svg>
+  );
+}
+
+function PaybackBar({ payback }) {
+  const w = Math.min((payback / 25) * 100, 100);
+  return (
+    <div style={{ marginTop: 10 }}>
+      <div style={{ height: 16, background: T.subtle, position: "relative" }}>
+        <div style={{ width: w + "%", height: "100%", background: T.navy }} />
+      </div>
+      <div style={{ display: "flex", justifyContent: "space-between", marginTop: 4 }}>
+        <span style={{ color: T.muted, fontSize: 9, fontFamily: sans }}>0</span>
+        <span style={{ color: T.burgundy, fontSize: 11, fontFamily: serif, fontStyle: "italic" }}>
+          {yr(payback)} to break even
+        </span>
+        <span style={{ color: T.muted, fontSize: 9, fontFamily: sans }}>25 YR</span>
+      </div>
+    </div>
+  );
+}
+
+/* ============================================================
+   UI primitives — institutional
+   ============================================================ */
+const Eyebrow = ({ children }) => (
+  <div style={{ fontFamily: sans, fontSize: 9, letterSpacing: 2.5, textTransform: "uppercase", color: T.muted }}>
+    {children}
+  </div>
+);
+
+const Exhibit = ({ num, title, sub, children }) => (
+  <div style={{ background: "#FBF8EE", border: `1px solid ${T.border}`, padding: 18, marginBottom: 14 }}>
+    <div style={{ fontFamily: serif, fontSize: 14, color: T.navy }}>
+      <span style={{ color: T.burgundy, fontWeight: 700 }}>Exhibit {num}.</span> {title}
+    </div>
+    {sub && (
+      <div style={{ fontFamily: serif, fontStyle: "italic", fontSize: 11, color: T.muted, marginTop: 2, marginBottom: 8 }}>
+        {sub}
+      </div>
+    )}
+    <div style={{ marginTop: sub ? 0 : 8 }}>{children}</div>
+  </div>
+);
+
+const Stat = ({ label, value, accent }) => (
+  <div style={{ flex: 1, minWidth: 130, borderLeft: `2px solid ${accent || T.border}`, paddingLeft: 12 }}>
+    <Eyebrow>{label}</Eyebrow>
+    <div style={{ fontFamily: serif, fontSize: 22, color: accent && accent !== T.border ? accent : T.navy, marginTop: 3 }}>
+      {value}
+    </div>
+  </div>
+);
+
+const Field = ({ label, value, onChange, type = "number", suffix }) => (
+  <label style={{ display: "block", marginBottom: 9 }}>
+    <span style={{ fontFamily: sans, fontSize: 9, letterSpacing: 1, textTransform: "uppercase", color: T.muted, display: "block", marginBottom: 3 }}>
+      {label}
+    </span>
+    <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+      <input
+        type={type}
+        value={value}
+        onChange={(ev) => onChange(type === "number" ? parseFloat(ev.target.value) || 0 : ev.target.value)}
+        style={{
+          flex: 1, background: "#FBF8EE", border: `1px solid ${T.border}`,
+          color: T.text, padding: "6px 8px", fontSize: 13, fontFamily: serif, width: "100%",
+        }}
+      />
+      {suffix && <span style={{ color: T.muted, fontSize: 10, fontFamily: sans }}>{suffix}</span>}
+    </div>
+  </label>
+);
+
+const Row = ({ k, v, c, big, highlight }) => (
+  <div style={{
+    display: "flex", justifyContent: "space-between", alignItems: "baseline",
+    padding: "7px 8px", background: highlight ? T.row : "transparent",
+    borderBottom: `1px solid ${T.subtle}`,
+  }}>
+    <span style={{ fontFamily: serif, color: T.sub, fontSize: big ? 14 : 12 }}>{k}</span>
+    <span style={{ fontFamily: serif, color: c || T.navy, fontSize: big ? 20 : 13, fontWeight: big ? 700 : 400 }}>
+      {v}
+    </span>
+  </div>
+);
+
+/* ============================================================
+   MAIN
+   ============================================================ */
+function ProposalEngineJPM() {
+  const [cfg, setCfg] = useState({
+    clientName: "Sample Client",
+    address: "Westchester County, NY",
+    mode: "hybrid", // "hybrid" = solar + storage | "battery" = storage only
+    monthlyBill: 320,
+    annualUsage: 14000,
+    ratePlan: "Con Ed EL1 (flat)",
+    blendedRate: 0.27,
+    peakRate: 0.2786,
+    offPeakRate: 0.0522,
+    systemKw: 11.2,
+    panelCount: 26,
+    annualProduction: 12800,
+    offsetPct: null,
+    batteryKwh: 16,
+    batteryQty: 1,
+    eveningDrawKw: 2.5,
+    peakWindowHours: 5,
+    grossPrice: 42000,
+    nyserda: 4000,
+    nyStateCredit: 5000,
+    nyserdaPreApplied: false,
+  });
+  const [tab, setTab] = useState("profile");
+  const [showCfg, setShowCfg] = useState(true);
+  const [thesis, setThesis] = useState(null); // narration object: {profile,savings,battery,thesis}
+  const [loadingThesis, setLoadingThesis] = useState(false);
+  const set = (k) => (v) => setCfg((p) => ({ ...p, [k]: v }));
+  const e = useMemo(() => calcEngine(cfg), [cfg]);
+
+  async function generateNarration() {
+    setLoadingThesis(true);
+    const obj = await fetchNarration(e, cfg);
+    setThesis(obj);
+    setLoadingThesis(false);
+  }
+
+  const tabs = [
+    { id: "profile", label: "I. Energy Profile" },
+    { id: "savings", label: cfg.mode === "battery" ? "II. Arbitrage Savings" : "II. Savings & Offset" },
+    { id: "battery", label: "III. Storage & TOU" },
+    { id: "offer", label: "IV. Investment" },
+  ];
+  const today = new Date().toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
+
+  return (
+    <div style={{ background: T.bg, color: T.text, fontFamily: serif, minHeight: "100vh", padding: 24 }}>
+      {/* Letterhead */}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", borderBottom: `2px solid ${T.navy}`, paddingBottom: 10 }}>
+        <div>
+          <div style={{ fontFamily: sans, fontSize: 10, letterSpacing: 2, color: T.navy, fontWeight: 700 }}>
+            RIVERTOWN SOLAR · WESTCHESTER HOME ENERGY
+          </div>
+          <div style={{ fontFamily: sans, fontSize: 9, letterSpacing: 1, color: T.muted, marginTop: 3 }}>
+            RESIDENTIAL ENERGY ANALYSIS · BRIEFING DOCUMENT
+          </div>
+        </div>
+        <div style={{ textAlign: "right" }}>
+          <div style={{ fontFamily: sans, fontSize: 9, letterSpacing: 1.5, color: T.burgundy }}>
+            CONFIDENTIAL · CLIENT-PRIVILEGED
+          </div>
+          <div style={{ fontFamily: sans, fontSize: 9, color: T.muted, marginTop: 3 }}>Prepared {today}</div>
+        </div>
+      </div>
+
+      {/* Title block */}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginTop: 16 }}>
+        <div>
+          <h1 style={{ fontFamily: serif, fontSize: 24, fontWeight: 400, color: T.navy, margin: 0 }}>
+            Energy & Investment Briefing
+          </h1>
+          <div style={{ fontFamily: serif, fontStyle: "italic", fontSize: 13, color: T.muted, marginTop: 2 }}>
+            Solar generation and storage arbitrage analysis
+          </div>
+        </div>
+        <div style={{ textAlign: "right" }}>
+          <Eyebrow>Prepared For</Eyebrow>
+          <div style={{ fontFamily: serif, fontSize: 15, color: T.navy, marginTop: 2 }}>{cfg.clientName}</div>
+          <div style={{ fontFamily: serif, fontSize: 12, color: T.muted }}>{cfg.address}</div>
+        </div>
+      </div>
+
+      <div style={{ display: "flex", gap: 10, marginTop: 14, alignItems: "center", flexWrap: "wrap" }}>
+        <div style={{ display: "flex", border: `1px solid ${T.navy}` }}>
+          {[
+            { id: "hybrid", label: "Solar + Storage" },
+            { id: "solar", label: "Solar Only" },
+            { id: "battery", label: "Storage Only" },
+          ].map((m) => (
+            <button
+              key={m.id}
+              onClick={() => set("mode")(m.id)}
+              style={{
+                background: cfg.mode === m.id ? T.navy : "transparent",
+                color: cfg.mode === m.id ? T.bg : T.navy,
+                border: "none", padding: "6px 14px", cursor: "pointer",
+                fontFamily: sans, fontSize: 10, letterSpacing: 1, textTransform: "uppercase",
+              }}
+            >
+              {m.label}
+            </button>
+          ))}
+        </div>
+        <button
+          onClick={() => setShowCfg((s) => !s)}
+          style={{ background: "transparent", border: `1px solid ${T.navy}`, color: T.navy,
+            padding: "6px 14px", cursor: "pointer", fontFamily: sans, fontSize: 10, letterSpacing: 1, textTransform: "uppercase" }}
+        >
+          {showCfg ? "Hide" : "Edit"} Inputs
+        </button>
+        <button
+          onClick={generateNarration}
+          disabled={loadingThesis}
+          style={{ background: T.navy, border: `1px solid ${T.navy}`, color: T.bg,
+            padding: "6px 14px", cursor: loadingThesis ? "default" : "pointer",
+            fontFamily: sans, fontSize: 10, letterSpacing: 1, textTransform: "uppercase", opacity: loadingThesis ? 0.6 : 1 }}
+        >
+          {loadingThesis ? "Generating…" : thesis ? "Regenerate Narration" : "Generate Narration"}
+        </button>
+      </div>
+
+      {/* Config */}
+      {showCfg && (
+        <div style={{ background: "#FBF8EE", border: `1px solid ${T.border}`, padding: 18, marginTop: 12 }}>
+          <Eyebrow>Client Inputs · You Control Every Figure</Eyebrow>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(170px, 1fr))", gap: "0 18px", marginTop: 12 }}>
+            <Field label="Client Name" type="text" value={cfg.clientName} onChange={set("clientName")} />
+            <Field label="Address" type="text" value={cfg.address} onChange={set("address")} />
+            <Field label="Rate Plan" type="text" value={cfg.ratePlan} onChange={set("ratePlan")} />
+            <Field label="Monthly Bill" value={cfg.monthlyBill} onChange={set("monthlyBill")} suffix="$" />
+            <Field label="Annual Usage" value={cfg.annualUsage} onChange={set("annualUsage")} suffix="kWh" />
+            <Field label="Blended Rate" value={cfg.blendedRate} onChange={set("blendedRate")} suffix="$/kWh" />
+            <Field label="Peak Rate (TOU)" value={cfg.peakRate} onChange={set("peakRate")} suffix="$/kWh" />
+            <Field label="Off-Peak Rate (TOU)" value={cfg.offPeakRate} onChange={set("offPeakRate")} suffix="$/kWh" />
+            <Field label="System Size" value={cfg.systemKw} onChange={set("systemKw")} suffix="kW" />
+            <Field label="Panel Count" value={cfg.panelCount} onChange={set("panelCount")} />
+            <Field label="Annual Production" value={cfg.annualProduction} onChange={set("annualProduction")} suffix="kWh" />
+            <Field label="Battery Size (each)" value={cfg.batteryKwh} onChange={set("batteryKwh")} suffix="kWh" />
+            <Field label="Battery Qty" value={cfg.batteryQty} onChange={set("batteryQty")} />
+            <Field label="Evening Peak Draw" value={cfg.eveningDrawKw} onChange={set("eveningDrawKw")} suffix="kW" />
+            <Field label="Peak Window" value={cfg.peakWindowHours} onChange={set("peakWindowHours")} suffix="hrs" />
+            <Field label="Gross Price" value={cfg.grossPrice} onChange={set("grossPrice")} suffix="$" />
+            <Field label="NYSERDA" value={cfg.nyserda} onChange={set("nyserda")} suffix="$" />
+            <Field label="NY State Credit" value={cfg.nyStateCredit} onChange={set("nyStateCredit")} suffix="$" />
+          </div>
+          <label style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 8, color: T.sub, fontSize: 11, fontFamily: serif }}>
+            <input type="checkbox" checked={cfg.nyserdaPreApplied} onChange={(ev) => set("nyserdaPreApplied")(ev.target.checked)} />
+            NYSERDA already baked into gross price (prevents double-deduct)
+          </label>
+        </div>
+      )}
+
+      {/* Section tabs */}
+      <div style={{ display: "flex", gap: 0, marginTop: 18, borderBottom: `1px solid ${T.border}` }}>
+        {tabs.map((t) => (
+          <button
+            key={t.id}
+            onClick={() => setTab(t.id)}
+            style={{
+              background: "transparent", border: "none",
+              borderBottom: tab === t.id ? `2px solid ${T.navy}` : "2px solid transparent",
+              color: tab === t.id ? T.navy : T.muted, padding: "10px 16px", cursor: "pointer",
+              fontFamily: serif, fontSize: 13, fontWeight: tab === t.id ? 700 : 400,
+            }}
+          >
+            {t.label}
+          </button>
+        ))}
+      </div>
+
+      <div style={{ marginTop: 18 }}>
+        {/* I. ENERGY PROFILE */}
+        {tab === "profile" && (
+          <div>
+            <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginBottom: 16 }}>
+              <Stat label="Monthly Bill" value={money(cfg.monthlyBill)} accent={T.burgundy} />
+              <Stat label="Annual Bill" value={money(e.annualBill)} accent={T.burgundy} />
+              <Stat label="Annual Usage" value={cfg.annualUsage.toLocaleString() + " kWh"} />
+              <Stat label="Rate Plan" value={cfg.ratePlan} accent={T.cSlate} />
+            </div>
+            <div style={{ background: T.row, borderLeft: `3px solid ${T.burgundy}`, padding: 16 }}>
+              <Eyebrow>Executive Summary</Eyebrow>
+              <div style={{ fontFamily: serif, fontSize: 13, color: T.sub, marginTop: 6, lineHeight: 1.6 }}>
+                {thesis && thesis.profile ? (
+                  thesis.profile
+                ) : (
+                  <>The household spends <strong style={{ color: T.navy }}>{money(e.annualBill)} annually</strong> on
+                  electricity at a blended {(cfg.blendedRate * 100).toFixed(1)}¢/kWh.
+                  {cfg.batteryQty > 0 && cfg.peakRate > cfg.offPeakRate
+                    ? <> Peak-hour consumption represents the primary cost exposure; storage shifts that load off the expensive window while solar offsets baseline draw.</>
+                    : <> Solar generation offsets the majority of consumption directly at the meter.</>}</>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* II. SAVINGS & OFFSET (or ARBITRAGE in battery-only) */}
+        {tab === "savings" && (
+          <div>
+            {thesis && thesis.savings && (
+              <div style={{ fontFamily: serif, fontStyle: "italic", fontSize: 13, color: T.navy, marginBottom: 12, paddingLeft: 12, borderLeft: `2px solid ${T.gold}` }}>
+                {thesis.savings}
+              </div>
+            )}
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: 14 }}>
+            {e.batteryOnly ? (
+              <Exhibit num="1" title="Arbitrage Source" sub="Savings driven entirely by peak/off-peak shifting">
+                <div style={{ fontFamily: serif, fontSize: 13, color: T.sub, lineHeight: 1.7 }}>
+                  No solar in this configuration. All savings come from storage moving
+                  <strong style={{ color: T.navy }}> {e.shiftedKwh.toFixed(1)} kWh</strong> per evening off the peak rate
+                  at a <strong style={{ color: T.navy }}>{(e.spread * 100).toFixed(1)}¢/kWh</strong> spread.
+                </div>
+                <div style={{ textAlign: "center", fontFamily: serif, color: T.cForest, fontWeight: 700, fontSize: 22, marginTop: 14 }}>
+                  {money(e.touSavings)} / yr
+                </div>
+              </Exhibit>
+            ) : (
+              <Exhibit num="1" title="Solar Offset" sub="Annual production as share of consumption">
+                <div style={{ display: "flex", justifyContent: "center" }}>
+                  <OffsetRing frac={e.offsetFrac} />
+                </div>
+                <div style={{ fontFamily: serif, fontSize: 12, color: T.muted, textAlign: "center", marginTop: 4 }}>
+                  {cfg.annualProduction.toLocaleString()} kWh produced · {cfg.annualUsage.toLocaleString()} kWh used
+                </div>
+              </Exhibit>
+            )}
+            <Exhibit num="2" title="Annual Cost · Before vs After" sub="Projected first-year bill impact">
+              <BarPair before={e.annualBill} after={Math.max(e.annualBill - e.totalAnnual, 0)} />
+              <div style={{ textAlign: "center", fontFamily: serif, color: T.cForest, fontWeight: 700, fontSize: 16 }}>
+                {money(e.totalAnnual)} / yr
+              </div>
+            </Exhibit>
+            </div>
+          </div>
+        )}
+
+        {/* III. STORAGE & TOU */}
+        {tab === "battery" && (
+          e.solarOnly ? (
+            <Exhibit num="3" title="Storage & TOU" sub="Not modeled in this configuration">
+              <div style={{ fontFamily: serif, fontSize: 13, color: T.sub, lineHeight: 1.7 }}>
+                This is a solar-only configuration. Time-of-use arbitrage requires storage and is not
+                part of these figures. Storage can be phased in later to capture peak/off-peak spread;
+                switch to <strong style={{ color: T.navy }}>Solar + Storage</strong> above to model it.
+              </div>
+            </Exhibit>
+          ) : (
+          <div>
+            <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginBottom: 16 }}>
+              <Stat label="Total Capacity" value={cfg.batteryKwh * cfg.batteryQty + " kWh"} />
+              <Stat label="Usable · 80% DOD" value={e.usableKwh.toFixed(1) + " kWh"} accent={T.gold} />
+              <Stat label="Peak Window Draw" value={e.windowDraw.toFixed(1) + " kWh"} />
+              <Stat label="Coverage" value={e.windowDraw > 0 ? pct(Math.min(e.usableKwh / e.windowDraw, 1)) : "—"} accent={T.cForest} />
+            </div>
+            <Exhibit num="3" title="Time-of-Use Arbitrage" sub="Load shifted from peak to off-peak pricing">
+              {thesis && thesis.battery && (
+                <div style={{ fontFamily: serif, fontStyle: "italic", fontSize: 13, color: T.navy, marginBottom: 10, paddingLeft: 10, borderLeft: `2px solid ${T.gold}` }}>
+                  {thesis.battery}
+                </div>
+              )}
+              <div style={{ fontFamily: serif, fontSize: 13, color: T.sub, lineHeight: 1.7 }}>
+                Storage shifts <strong style={{ color: T.navy }}>{e.shiftedKwh.toFixed(1)} kWh</strong> out of the
+                evening peak window daily at a <strong style={{ color: T.navy }}>{(e.spread * 100).toFixed(1)}¢/kWh</strong> spread
+                (peak {money(cfg.peakRate).replace("$", "")} vs off-peak {money(cfg.offPeakRate).replace("$", "")}).
+                Annualized under a conservative seasonal factor:
+                <strong style={{ color: T.cForest }}> {money(e.touSavings)} / yr</strong>.
+              </div>
+              <div style={{ fontFamily: serif, fontStyle: "italic", fontSize: 11, color: T.muted, marginTop: 10, borderTop: `1px solid ${T.subtle}`, paddingTop: 8 }}>
+                Seasonal moderation applied: winter peak rates run below summer levels, so the summer spread is not annualized at full value.
+              </div>
+            </Exhibit>
+          </div>
+          )
+        )}
+
+        {/* IV. INVESTMENT */}
+        {tab === "offer" && (
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: 14 }}>
+            <Exhibit num="4" title="Investment Summary" sub="Net of applicable incentives">
+              <Row k="Gross System Price" v={money(cfg.grossPrice)} />
+              <Row
+                k={"NYSERDA NY-Sun" + (cfg.nyserdaPreApplied ? " (pre-applied)" : "")}
+                v={cfg.nyserdaPreApplied ? "in gross" : "(" + money(cfg.nyserda) + ")"}
+                c={cfg.nyserdaPreApplied ? T.muted : T.cForest}
+              />
+              <Row
+                k={"NY State Credit" + (e.batteryOnly ? " (n/a · IT-255)" : "")}
+                v={e.batteryOnly ? "$0" : "(" + money(e.nyStateCredit) + ")"}
+                c={e.batteryOnly ? T.muted : T.cForest}
+              />
+              <Row k="Federal ITC" v="$0 (expired)" c={T.muted} />
+              <Row k="Net Investment" v={money(e.netCost)} c={T.navy} big highlight />
+              {e.batteryOnly && (
+                <div style={{ fontFamily: serif, fontStyle: "italic", fontSize: 11, color: T.burgundy, marginTop: 8, lineHeight: 1.5 }}>
+                  Incentive reality check: a standalone battery retrofit does not qualify for the NY State solar equipment credit (IT-255). Only NYSERDA storage incentive applies.
+                </div>
+              )}
+            </Exhibit>
+            <Exhibit num="5" title="Projected Return" sub="25-year horizon, 3% utility escalation">
+              <Row k="First-Year Savings" v={money(e.totalAnnual)} c={T.cForest} />
+              <Row k="25-Year Net Savings" v={money(e.lifetime)} c={T.cForest} big highlight />
+              <PaybackBar payback={e.payback} />
+            </Exhibit>
+            <div style={{ gridColumn: "1 / -1", background: T.row, borderLeft: `3px solid ${T.navy}`, padding: 16 }}>
+              <Eyebrow>Investment Thesis</Eyebrow>
+              <div style={{ fontFamily: serif, fontSize: 13, color: T.sub, marginTop: 6, lineHeight: 1.6 }}>
+                {thesis && thesis.thesis ? (
+                  thesis.thesis
+                ) : e.solarOnly ? (
+                  <>Solar offsets {pct(e.offsetFrac)} of consumption at the meter, with no storage in this configuration. Net investment of <strong style={{ color: T.navy }}>{money(e.netCost)}</strong> recovers in <em style={{ color: T.burgundy }}>{yr(e.payback)}</em>; storage can phase in later to add peak-load shifting.</>
+                ) : cfg.batteryQty > 0 ? (
+                  <>Solar paired with {cfg.batteryQty} storage unit{cfg.batteryQty > 1 ? "s" : ""} offsets {pct(e.offsetFrac)} of consumption and shifts peak load. Net investment of <strong style={{ color: T.navy }}>{money(e.netCost)}</strong> recovers in <em style={{ color: T.burgundy }}>{yr(e.payback)}</em>.</>
+                ) : (
+                  <>Solar offsets {pct(e.offsetFrac)} of consumption at the meter. Net investment of <strong style={{ color: T.navy }}>{money(e.netCost)}</strong> recovers in <em style={{ color: T.burgundy }}>{yr(e.payback)}</em>; storage can phase in later.</>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      <div style={{ fontFamily: sans, fontSize: 9, color: T.muted, marginTop: 24, paddingTop: 10, borderTop: `1px solid ${T.border}`, textAlign: "center", letterSpacing: 0.5 }}>
+        RIVERTOWN SOLAR · FIGURES COMPUTED FROM INPUTS ABOVE · ESTIMATES ONLY, NOT A BINDING QUOTE
+      </div>
+    </div>
+  );
+}
+
+
+ReactDOM.createRoot(document.getElementById("root")).render(<ProposalEngineJPM />);
+</script>
+</body>
+</html>

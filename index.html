@@ -249,6 +249,7 @@ const Field = ({ label, value, onChange, type = "number", suffix }) => (
       <input
         type={type}
         value={value}
+        onFocus={(ev) => ev.target.select()}
         onChange={(ev) => onChange(type === "number" ? parseFloat(ev.target.value) || 0 : ev.target.value)}
         style={{
           flex: 1, background: "#FBF8EE", border: `1px solid ${T.border}`,

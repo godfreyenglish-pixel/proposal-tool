@@ -310,15 +310,18 @@ const DEFAULTS = {
 /* Per-client link: the client's data lives in the URL hash (#d=...).
    The hash fragment is never sent to any server, so the numbers stay
    private, and each link is fully self-contained (no overlap possible). */
-function encodeClient(cfg) {
-  return btoa(unescape(encodeURIComponent(JSON.stringify(cfg))));
+function encodeClient(cfg, locked) {
+  const payload = locked ? { ...cfg, _v: 1 } : cfg;
+  return btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
 }
 function decodeClientFromHash() {
   try {
     const m = (window.location.hash || "").match(/[#&]d=([^&]+)/);
     if (!m) return null;
     const obj = JSON.parse(decodeURIComponent(escape(atob(decodeURIComponent(m[1])))));
-    return { ...DEFAULTS, ...obj };
+    const locked = obj._v === 1;
+    delete obj._v;
+    return { cfg: { ...DEFAULTS, ...obj }, locked };
   } catch {
     return null;
   }
@@ -326,7 +329,8 @@ function decodeClientFromHash() {
 
 function ProposalEngineJPM() {
   const loaded = decodeClientFromHash();
-  const [cfg, setCfg] = useState(loaded || DEFAULTS);
+  const [cfg, setCfg] = useState(loaded ? loaded.cfg : DEFAULTS);
+  const [locked] = useState(loaded ? loaded.locked : false); // client view: no editing controls
   const [tab, setTab] = useState("profile");
   const [showCfg, setShowCfg] = useState(loaded ? false : true);
   const [copied, setCopied] = useState(false);
@@ -342,9 +346,16 @@ function ProposalEngineJPM() {
     setLoadingThesis(false);
   }
 
+  // In a locked client view, auto-load the narration once so the client sees the
+  // polished version without any button.
+  React.useEffect(() => {
+    if (locked) generateNarration();
+    // eslint-disable-next-line
+  }, []);
+
   function copyClientLink() {
-    const url = window.location.origin + window.location.pathname + "#d=" + encodeURIComponent(encodeClient(cfg));
-    try { window.history.replaceState(null, "", url); } catch (err) {}
+    // The copied link is LOCKED (client view). The rep's own session is untouched.
+    const url = window.location.origin + window.location.pathname + "#d=" + encodeURIComponent(encodeClient(cfg, true));
     if (navigator.clipboard && navigator.clipboard.writeText) {
       navigator.clipboard.writeText(url).then(() => {
         setCopied(true);
@@ -406,6 +417,7 @@ function ProposalEngineJPM() {
         </div>
       </div>
 
+      {!locked && (
       <div style={{ display: "flex", gap: 10, marginTop: 14, alignItems: "center", flexWrap: "wrap" }}>
         <div style={{ display: "flex", border: `1px solid ${T.navy}` }}>
           {[
@@ -458,9 +470,10 @@ function ProposalEngineJPM() {
           New Client
         </button>
       </div>
+      )}
 
       {/* Config */}
-      {showCfg && (
+      {!locked && showCfg && (
         <div style={{ background: "#FBF8EE", border: `1px solid ${T.border}`, padding: 18, marginTop: 12 }}>
           <Eyebrow>Client Inputs · You Control Every Figure</Eyebrow>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(170px, 1fr))", gap: "0 18px", marginTop: 12 }}>

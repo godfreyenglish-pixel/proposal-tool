@@ -95,7 +95,11 @@ function calcEngine(c) {
   const spread = Math.max(c.peakRate - c.offPeakRate, 0);
   const dailyArb = shiftedKwh * spread;
   const SEASONAL = 0.85;
-  const touSavings = c.batteryQty > 0 && c.mode !== "solar" ? dailyArb * 365 * SEASONAL : 0;
+  const touEstimate = c.batteryQty > 0 && c.mode !== "solar" ? dailyArb * 365 * SEASONAL : 0;
+  // If a verified arbitrage figure from the interval-simulation battery tool is
+  // supplied, it overrides the rough estimate. One number keeps the link small.
+  const arbVerified = (c.arbOverride || 0) > 0 && c.mode !== "solar";
+  const touSavings = arbVerified ? c.arbOverride : touEstimate;
 
   const nyserdaApplied = c.nyserdaPreApplied ? 0 : c.nyserda;
   // IT-255: a standalone battery retrofit does NOT qualify for the NY State
@@ -105,7 +109,22 @@ function calcEngine(c) {
   const roofAdder = c.roofAdder || 0;
   const customAdder = c.customAdder || 0;
   const adders = roofAdder + customAdder;
-  const netCost = c.grossPrice + adders - nyserdaApplied - nyStateCredit;
+
+  // Storage-only is priced off the battery system line; solar/hybrid off gross.
+  const priceBase = batteryOnly ? (c.batteryPrice || 0) : c.grossPrice;
+  const netCost = priceBase + adders - nyserdaApplied - nyStateCredit;
+
+  // El1 (flat) vs voluntary TOU: on a flat rate the battery captures NO arbitrage
+  // (no peak/off-peak spread to shift value across), it is backup only. The TOU
+  // savings only materialize if the client switches El1 -> voluntary Rate III TOU.
+  const arbEl1 = 0;
+  const arbTou = touSavings;
+  const touPayback = arbTou > 0 ? netCost / arbTou : 0;
+  // Feasibility of the El1 -> voluntary TOU switch: worth it when the spread is
+  // meaningful and the battery pays back within its useful/warranty life (~15 yr).
+  const spreadThin = spread < 0.10;
+  const touFeasible = batteryOnly && arbTou > 0 && touPayback > 0 && touPayback <= 15 && !spreadThin;
+
   const totalAnnual = solarSavings + touSavings;
   const payback = totalAnnual > 0 ? netCost / totalAnnual : 0;
   const ESC = 0.03;
@@ -119,7 +138,8 @@ function calcEngine(c) {
   return {
     batteryOnly, solarOnly: c.mode === "solar", annualBill, offsetFrac, solarSavings,
     usableKwh, windowDraw, shiftedKwh, spread, touSavings, netCost, nyserdaApplied,
-    nyStateCredit, roofAdder, customAdder, totalAnnual, payback, lifetime,
+    nyStateCredit, roofAdder, customAdder, priceBase, arbEl1, arbTou, touPayback,
+    touFeasible, spreadThin, arbVerified, touEstimate, totalAnnual, payback, lifetime,
   };
 }
 
@@ -275,6 +295,8 @@ const DEFAULTS = {
   eveningDrawKw: 2.5,
   peakWindowHours: 5,
   grossPrice: 42000,
+  batteryPrice: 16000,
+  arbOverride: 0,
   nyserda: 4000,
   nyStateCredit: 5000,
   nyserdaPreApplied: false,
@@ -457,6 +479,8 @@ function ProposalEngineJPM() {
             <Field label="Evening Peak Draw" value={cfg.eveningDrawKw} onChange={set("eveningDrawKw")} suffix="kW" />
             <Field label="Peak Window" value={cfg.peakWindowHours} onChange={set("peakWindowHours")} suffix="hrs" />
             <Field label="Gross Price" value={cfg.grossPrice} onChange={set("grossPrice")} suffix="$" />
+            <Field label="Battery Price" value={cfg.batteryPrice} onChange={set("batteryPrice")} suffix="$" />
+            <Field label="Verified Arbitrage (battery tool)" value={cfg.arbOverride} onChange={set("arbOverride")} suffix="$/yr" />
             <Field label="NYSERDA" value={cfg.nyserda} onChange={set("nyserda")} suffix="$" />
             <Field label="NY State Credit" value={cfg.nyStateCredit} onChange={set("nyStateCredit")} suffix="$" />
             <Field label="Roof Work" value={cfg.roofAdder} onChange={set("roofAdder")} suffix="$" />
@@ -526,14 +550,33 @@ function ProposalEngineJPM() {
             )}
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: 14 }}>
             {e.batteryOnly ? (
-              <Exhibit num="1" title="Arbitrage Source" sub="Savings driven entirely by peak/off-peak shifting">
-                <div style={{ fontFamily: serif, fontSize: 13, color: T.sub, lineHeight: 1.7 }}>
-                  No solar in this configuration. All savings come from storage moving
-                  <strong style={{ color: T.navy }}> {e.shiftedKwh.toFixed(1)} kWh</strong> per evening off the peak rate
-                  at a <strong style={{ color: T.navy }}>{(e.spread * 100).toFixed(1)}¢/kWh</strong> spread.
+              <Exhibit num="1" title="El1 vs Voluntary TOU" sub="The real question: is switching rate plans worth it?">
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 0, marginBottom: 12 }}>
+                  <div style={{ padding: "10px 12px", borderRight: `1px solid ${T.subtle}` }}>
+                    <Eyebrow>Stay on El1 (flat)</Eyebrow>
+                    <div style={{ fontFamily: serif, fontSize: 20, color: T.muted, marginTop: 4 }}>{money(e.arbEl1)} / yr</div>
+                    <div style={{ fontFamily: serif, fontSize: 11, color: T.muted, fontStyle: "italic", marginTop: 2 }}>Backup only. A flat rate has no peak/off-peak spread to capture.</div>
+                  </div>
+                  <div style={{ padding: "10px 12px" }}>
+                    <Eyebrow>Switch to voluntary TOU</Eyebrow>
+                    <div style={{ fontFamily: serif, fontSize: 20, color: T.cForest, marginTop: 4 }}>{money(e.arbTou)} / yr</div>
+                    <div style={{ fontFamily: serif, fontSize: 11, color: T.muted, fontStyle: "italic", marginTop: 2 }}>Battery shifts {e.shiftedKwh.toFixed(1)} kWh/evening at a {(e.spread * 100).toFixed(1)}¢ spread.</div>
+                    <div style={{ fontFamily: sans, fontSize: 8, letterSpacing: 1, textTransform: "uppercase", color: e.arbVerified ? T.cForest : T.gold, marginTop: 4 }}>
+                      {e.arbVerified ? "✓ Verified · interval simulation" : "Estimate · run battery tool to verify"}
+                    </div>
+                  </div>
                 </div>
-                <div style={{ textAlign: "center", fontFamily: serif, color: T.cForest, fontWeight: 700, fontSize: 22, marginTop: 14 }}>
-                  {money(e.touSavings)} / yr
+                <div style={{ background: e.touFeasible ? "#EAF0E8" : T.row, borderLeft: `3px solid ${e.touFeasible ? T.cForest : T.burgundy}`, padding: 12 }}>
+                  <Eyebrow>Feasibility Verdict</Eyebrow>
+                  <div style={{ fontFamily: serif, fontSize: 13, color: T.sub, marginTop: 4, lineHeight: 1.6 }}>
+                    {e.arbTou <= 0
+                      ? <>With these rates there is no spread to capture, so the switch is not justified. This is a <strong style={{ color: T.navy }}>backup-first</strong> system.</>
+                      : e.spreadThin
+                      ? <>The peak/off-peak spread ({(e.spread * 100).toFixed(1)}¢) is thin, so arbitrage is marginal. Lead with <strong style={{ color: T.navy }}>backup value</strong>, not the rate switch.</>
+                      : e.touFeasible
+                      ? <>Switching El1 to voluntary TOU is <strong style={{ color: T.cForest }}>worth it</strong>: the battery captures {money(e.arbTou)}/yr and pays back in <strong style={{ color: T.navy }}>{yr(e.touPayback)}</strong>, inside its useful life.</>
+                      : <>The switch returns {money(e.arbTou)}/yr but payback runs {yr(e.touPayback)}, beyond the comfortable window. Treat arbitrage as a <strong style={{ color: T.navy }}>secondary</strong> benefit to backup.</>}
+                  </div>
                 </div>
               </Exhibit>
             ) : (
@@ -599,7 +642,7 @@ function ProposalEngineJPM() {
         {tab === "offer" && (
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: 14 }}>
             <Exhibit num="4" title="Investment Summary" sub="Net of applicable incentives">
-              <Row k="Gross System Price" v={money(cfg.grossPrice)} />
+              <Row k={e.batteryOnly ? "Battery System Price" : "Gross System Price"} v={money(e.priceBase)} />
               {e.roofAdder > 0 && (
                 <Row k="Roof Work (included)" v={money(e.roofAdder)} c={T.navy} />
               )}
@@ -630,10 +673,27 @@ function ProposalEngineJPM() {
                 </div>
               )}
             </Exhibit>
-            <Exhibit num="5" title="Projected Return" sub="25-year horizon, 3% utility escalation">
-              <Row k="First-Year Savings" v={money(e.totalAnnual)} c={T.cForest} />
-              <Row k="25-Year Net Savings" v={money(e.lifetime)} c={T.cForest} big highlight />
-              <PaybackBar payback={e.payback} />
+            <Exhibit num="5" title={e.batteryOnly ? "Return (after El1 → TOU switch)" : "Projected Return"} sub={e.batteryOnly ? "Arbitrage requires switching to voluntary TOU" : "25-year horizon, 3% utility escalation"}>
+              {e.batteryOnly ? (
+                <>
+                  <Row k="On El1 (flat) — arbitrage" v={money(e.arbEl1) + " / yr"} c={T.muted} />
+                  <Row k="On voluntary TOU — arbitrage" v={money(e.arbTou) + " / yr"} c={T.cForest} />
+                  <Row k="Payback on the switch" v={yr(e.touPayback)} c={T.navy} highlight />
+                  <div style={{ fontFamily: serif, fontSize: 12, color: e.touFeasible ? T.cForest : T.burgundy, marginTop: 8, lineHeight: 1.5, fontStyle: "italic" }}>
+                    {e.arbTou <= 0 || e.spreadThin
+                      ? "Backup-first: the rate switch is not justified by arbitrage alone here."
+                      : e.touFeasible
+                      ? "The El1 to voluntary TOU switch pays for itself within the battery's useful life."
+                      : "Arbitrage is a secondary benefit; payback runs past the comfortable window."}
+                  </div>
+                </>
+              ) : (
+                <>
+                  <Row k="First-Year Savings" v={money(e.totalAnnual)} c={T.cForest} />
+                  <Row k="25-Year Net Savings" v={money(e.lifetime)} c={T.cForest} big highlight />
+                  <PaybackBar payback={e.payback} />
+                </>
+              )}
             </Exhibit>
             <div style={{ gridColumn: "1 / -1", background: T.row, borderLeft: `3px solid ${T.navy}`, padding: 16 }}>
               <Eyebrow>Investment Thesis</Eyebrow>
@@ -675,15 +735,23 @@ function ProposalEngineJPM() {
 
             <Exhibit num="8" title="Manufacturer (Equipment) Warranties" sub="Coverage depends on the equipment installed in your system">
               <div style={{ display: "grid", gridTemplateColumns: "2fr 2fr 1fr", gap: 0 }}>
-                {[
-                  ["Manufacturer", "Component", "Term", true],
-                  ["Enphase", "Microinverters (IQ series)", "25 yrs"],
-                  ["Enphase", "Batteries (IQ series)", "15 yrs"],
-                  ["Talesun", "Module output (yr 1 ≥97%, yr 25 ≥80%)", "25 yrs"],
-                  ["Talesun", "Material / workmanship integrity", "~25 yrs"],
-                  ["IronRidge", "Structural racking / hardware", "25 yrs"],
-                  ["IronRidge", "Accessories / junction boxes", "10 yrs"],
-                ].map((r, i) => (
+                {(e.batteryOnly
+                  ? [
+                      ["Manufacturer", "Component", "Term", true],
+                      ["Enphase", "IQ Battery system", "15 yrs"],
+                      ["EG4 / other", "Battery system", "per datasheet"],
+                      ["—", "Inverter / system controller", "per datasheet"],
+                    ]
+                  : [
+                      ["Manufacturer", "Component", "Term", true],
+                      ["Enphase", "Microinverters (IQ series)", "25 yrs"],
+                      ["Enphase", "Batteries (IQ series)", "15 yrs"],
+                      ["Talesun", "Module output (yr 1 ≥97%, yr 25 ≥80%)", "25 yrs"],
+                      ["Talesun", "Material / workmanship integrity", "~25 yrs"],
+                      ["IronRidge", "Structural racking / hardware", "25 yrs"],
+                      ["IronRidge", "Accessories / junction boxes", "10 yrs"],
+                    ]
+                ).map((r, i) => (
                   <React.Fragment key={i}>
                     <div style={{ fontFamily: r[3] ? sans : serif, fontSize: r[3] ? 9 : 13, letterSpacing: r[3] ? 1 : 0, textTransform: r[3] ? "uppercase" : "none", color: r[3] ? T.muted : T.navy, padding: "7px 8px", borderBottom: `1px solid ${T.subtle}`, background: r[3] ? T.row : (i % 2 ? "transparent" : "#FBF8EE") }}>{r[0]}</div>
                     <div style={{ fontFamily: r[3] ? sans : serif, fontSize: r[3] ? 9 : 12, letterSpacing: r[3] ? 1 : 0, textTransform: r[3] ? "uppercase" : "none", color: r[3] ? T.muted : T.sub, padding: "7px 8px", borderBottom: `1px solid ${T.subtle}`, background: r[3] ? T.row : (i % 2 ? "transparent" : "#FBF8EE") }}>{r[1]}</div>

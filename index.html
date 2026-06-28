@@ -252,32 +252,53 @@ const Row = ({ k, v, c, big, highlight }) => (
 /* ============================================================
    MAIN
    ============================================================ */
+const DEFAULTS = {
+  clientName: "Sample Client",
+  address: "Westchester County, NY",
+  mode: "hybrid", // "hybrid" = solar + storage | "solar" = solar only | "battery" = storage only
+  monthlyBill: 320,
+  annualUsage: 14000,
+  ratePlan: "Con Ed EL1 (flat)",
+  blendedRate: 0.27,
+  peakRate: 0.2786,
+  offPeakRate: 0.0522,
+  systemKw: 11.2,
+  panelCount: 26,
+  annualProduction: 12800,
+  offsetPct: null,
+  batteryKwh: 16,
+  batteryQty: 1,
+  eveningDrawKw: 2.5,
+  peakWindowHours: 5,
+  grossPrice: 42000,
+  nyserda: 4000,
+  nyStateCredit: 5000,
+  nyserdaPreApplied: false,
+};
+
+/* Per-client link: the client's data lives in the URL hash (#d=...).
+   The hash fragment is never sent to any server, so the numbers stay
+   private, and each link is fully self-contained (no overlap possible). */
+function encodeClient(cfg) {
+  return btoa(unescape(encodeURIComponent(JSON.stringify(cfg))));
+}
+function decodeClientFromHash() {
+  try {
+    const m = (window.location.hash || "").match(/[#&]d=([^&]+)/);
+    if (!m) return null;
+    const obj = JSON.parse(decodeURIComponent(escape(atob(decodeURIComponent(m[1])))));
+    return { ...DEFAULTS, ...obj };
+  } catch {
+    return null;
+  }
+}
+
 function ProposalEngineJPM() {
-  const [cfg, setCfg] = useState({
-    clientName: "Sample Client",
-    address: "Westchester County, NY",
-    mode: "hybrid", // "hybrid" = solar + storage | "battery" = storage only
-    monthlyBill: 320,
-    annualUsage: 14000,
-    ratePlan: "Con Ed EL1 (flat)",
-    blendedRate: 0.27,
-    peakRate: 0.2786,
-    offPeakRate: 0.0522,
-    systemKw: 11.2,
-    panelCount: 26,
-    annualProduction: 12800,
-    offsetPct: null,
-    batteryKwh: 16,
-    batteryQty: 1,
-    eveningDrawKw: 2.5,
-    peakWindowHours: 5,
-    grossPrice: 42000,
-    nyserda: 4000,
-    nyStateCredit: 5000,
-    nyserdaPreApplied: false,
-  });
+  const loaded = decodeClientFromHash();
+  const [cfg, setCfg] = useState(loaded || DEFAULTS);
   const [tab, setTab] = useState("profile");
-  const [showCfg, setShowCfg] = useState(true);
+  const [showCfg, setShowCfg] = useState(loaded ? false : true);
+  const [copied, setCopied] = useState(false);
   const [thesis, setThesis] = useState(null); // narration object: {profile,savings,battery,thesis}
   const [loadingThesis, setLoadingThesis] = useState(false);
   const set = (k) => (v) => setCfg((p) => ({ ...p, [k]: v }));
@@ -288,6 +309,24 @@ function ProposalEngineJPM() {
     const obj = await fetchNarration(e, cfg);
     setThesis(obj);
     setLoadingThesis(false);
+  }
+
+  function copyClientLink() {
+    const url = window.location.origin + window.location.pathname + "#d=" + encodeURIComponent(encodeClient(cfg));
+    try { window.history.replaceState(null, "", url); } catch (err) {}
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(url).then(() => {
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2500);
+      });
+    }
+  }
+
+  function newClient() {
+    setCfg(DEFAULTS);
+    setThesis(null);
+    setShowCfg(true);
+    try { window.history.replaceState(null, "", window.location.pathname); } catch (err) {}
   }
 
   const tabs = [
@@ -371,6 +410,20 @@ function ProposalEngineJPM() {
             fontFamily: sans, fontSize: 10, letterSpacing: 1, textTransform: "uppercase", opacity: loadingThesis ? 0.6 : 1 }}
         >
           {loadingThesis ? "Generating…" : thesis ? "Regenerate Narration" : "Generate Narration"}
+        </button>
+        <button
+          onClick={copyClientLink}
+          style={{ background: copied ? T.cForest : "transparent", border: `1px solid ${copied ? T.cForest : T.gold}`, color: copied ? T.bg : T.gold,
+            padding: "6px 14px", cursor: "pointer", fontFamily: sans, fontSize: 10, letterSpacing: 1, textTransform: "uppercase" }}
+        >
+          {copied ? "Link Copied ✓" : "Copy Client Link"}
+        </button>
+        <button
+          onClick={newClient}
+          style={{ background: "transparent", border: `1px solid ${T.muted}`, color: T.muted,
+            padding: "6px 14px", cursor: "pointer", fontFamily: sans, fontSize: 10, letterSpacing: 1, textTransform: "uppercase" }}
+        >
+          New Client
         </button>
       </div>
 

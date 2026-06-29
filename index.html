@@ -128,18 +128,39 @@ function calcEngine(c) {
   const totalAnnual = solarSavings + touSavings;
   const payback = totalAnnual > 0 ? netCost / totalAnnual : 0;
   const ESC = 0.03;
-  let lifetime = 0;
+  // One loop = one source of truth: builds lifetime, the cashflow series, and IRR flows.
+  const cashflow = [{ year: 0, cumulative: -netCost, annual: 0 }];
+  const irrFlows = [-netCost];
+  let cumulative = -netCost;
   let running = totalAnnual;
-  for (let i = 0; i < 25; i++) {
-    lifetime += running;
+  for (let i = 1; i <= 25; i++) {
+    cumulative += running;
+    cashflow.push({ year: i, cumulative: Math.round(cumulative), annual: Math.round(running) });
+    irrFlows.push(running);
     running *= 1 + ESC;
   }
-  lifetime -= netCost;
+  const lifetime = cumulative;
+  const beHit = cashflow.find((p) => p.cumulative >= 0);
+  const breakEvenYear = beHit ? beHit.year : null;
+  const intervalMarkers = cashflow.filter((p) => p.year > 0 && p.year % 5 === 0);
+  const irr = (cf) => {
+    const npv = (r) => cf.reduce((acc, v, t) => acc + v / Math.pow(1 + r, t), 0);
+    let lo = -0.9, hi = 1.0;
+    if (npv(lo) * npv(hi) > 0) return null;
+    for (let i = 0; i < 100; i++) {
+      const mid = (lo + hi) / 2, v = npv(mid);
+      if (Math.abs(v) < 1) return mid;
+      if (npv(lo) * v < 0) hi = mid; else lo = mid;
+    }
+    return (lo + hi) / 2;
+  };
+  const annualReturn = totalAnnual > 0 ? irr(irrFlows) : null;
   return {
     batteryOnly, solarOnly: c.mode === "solar", annualBill, offsetFrac, solarSavings,
     usableKwh, windowDraw, shiftedKwh, spread, touSavings, netCost, nyserdaApplied,
     nyStateCredit, roofAdder, customAdder, priceBase, arbEl1, arbTou, touPayback,
     touFeasible, spreadThin, arbVerified, touEstimate, totalAnnual, payback, lifetime,
+    cashflow, breakEvenYear, intervalMarkers, annualReturn,
   };
 }
 
@@ -230,6 +251,63 @@ const Exhibit = ({ num, title, sub, children }) => (
     <div style={{ marginTop: sub ? 0 : 8 }}>{children}</div>
   </div>
 );
+
+function ReturnChart({ cashflow, breakEvenYear, intervalMarkers, annualReturn, lifetime }) {
+  const W = 720, H = 300, padL = 60, padR = 20, padT = 24, padB = 36;
+  const k = (n) => (n < 0 ? "-$" : "$") + Math.abs(Math.round(n / 1000)) + "k";
+  const vals = cashflow.map((p) => p.cumulative);
+  const minV = Math.min(0, ...vals), maxV = Math.max(0, ...vals);
+  const xMax = Math.max(...cashflow.map((p) => p.year));
+  const X = (yv) => padL + (yv / xMax) * (W - padL - padR);
+  const Y = (v) => padT + (1 - (v - minV) / ((maxV - minV) || 1)) * (H - padT - padB);
+  const zeroY = Y(0);
+  const path = cashflow.map((p, i) => (i ? "L" : "M") + " " + X(p.year).toFixed(1) + " " + Y(p.cumulative).toFixed(1)).join(" ");
+  const beX = breakEvenYear != null ? X(breakEvenYear) : null;
+  const tickVals = Array.from({ length: 6 }, (_, i) => minV + (i / 5) * (maxV - minV));
+  const stats = [
+    ["Break-even", breakEvenYear != null ? "Year " + breakEvenYear : "Beyond term"],
+    ["Annual Return (IRR)", annualReturn != null ? (annualReturn * 100).toFixed(1) + "%" : "\u2014"],
+    ["25-Year Net", money(lifetime)],
+  ];
+  return (
+    <div>
+      <svg viewBox={"0 0 " + W + " " + H} width="100%" role="img" style={{ background: "#FBF8EE", border: `1px solid ${T.border}` }}>
+        {tickVals.map((tv, i) => (
+          <g key={i}>
+            <line x1={padL} x2={W - padR} y1={Y(tv)} y2={Y(tv)} stroke={T.subtle} strokeWidth="0.5" />
+            <text x={padL - 8} y={Y(tv) + 4} textAnchor="end" fontFamily={sans} fontSize="10" fill={T.muted}>{k(tv)}</text>
+          </g>
+        ))}
+        <line x1={padL} x2={W - padR} y1={zeroY} y2={zeroY} stroke={T.navy} strokeWidth="1.2" />
+        {beX != null && (
+          <g>
+            <line x1={beX} x2={beX} y1={padT} y2={H - padB} stroke={T.gold} strokeWidth="1" strokeDasharray="4 3" />
+            <circle cx={beX} cy={zeroY} r="4.5" fill={T.gold} />
+            <text x={beX} y={padT - 6} textAnchor="middle" fontFamily={sans} fontSize="10" fill={T.gold} fontWeight="700">Break-even \u00b7 Yr {breakEvenYear}</text>
+          </g>
+        )}
+        {intervalMarkers.map((p) => (
+          <g key={p.year}>
+            <circle cx={X(p.year)} cy={Y(p.cumulative)} r="3.5" fill={T.navy} />
+            <text x={X(p.year)} y={Y(p.cumulative) - 8} textAnchor="middle" fontFamily={sans} fontSize="9" fill={T.sub}>{k(p.cumulative)}</text>
+          </g>
+        ))}
+        <path d={path} fill="none" stroke={T.navy} strokeWidth="2" />
+        {cashflow.filter((p) => p.year % 5 === 0).map((p) => (
+          <text key={p.year} x={X(p.year)} y={H - padB + 16} textAnchor="middle" fontFamily={sans} fontSize="10" fill={T.muted}>Yr {p.year}</text>
+        ))}
+      </svg>
+      <div style={{ display: "flex", border: `1px solid ${T.border}`, borderTop: "none" }}>
+        {stats.map(([label, val], i) => (
+          <div key={i} style={{ flex: 1, padding: "10px 14px", borderLeft: i ? `1px solid ${T.border}` : "none" }}>
+            <div style={{ fontFamily: sans, fontSize: 9, letterSpacing: "0.06em", textTransform: "uppercase", color: T.muted }}>{label}</div>
+            <div style={{ fontFamily: serif, fontSize: 17, color: T.navy, fontWeight: 700, marginTop: 2 }}>{val}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 const Stat = ({ label, value, accent }) => (
   <div style={{ flex: 1, minWidth: 130, borderLeft: `2px solid ${accent || T.border}`, paddingLeft: 12 }}>
@@ -709,6 +787,13 @@ function ProposalEngineJPM() {
                 </>
               )}
             </Exhibit>
+            {!e.batteryOnly && e.breakEvenYear != null && (
+              <div style={{ gridColumn: "1 / -1" }}>
+                <Exhibit num="6" title="Cumulative Net Position" sub="25-year horizon, 3% utility escalation. Break-even where the line crosses zero">
+                  <ReturnChart cashflow={e.cashflow} breakEvenYear={e.breakEvenYear} intervalMarkers={e.intervalMarkers} annualReturn={e.annualReturn} lifetime={e.lifetime} />
+                </Exhibit>
+              </div>
+            )}
             <div style={{ gridColumn: "1 / -1", background: T.row, borderLeft: `3px solid ${T.navy}`, padding: 16 }}>
               <Eyebrow>Investment Thesis</Eyebrow>
               <div style={{ fontFamily: serif, fontSize: 13, color: T.sub, marginTop: 6, lineHeight: 1.6 }}>

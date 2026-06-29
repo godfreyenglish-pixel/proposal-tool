@@ -283,7 +283,7 @@ function ReturnChart({ cashflow, breakEvenYear, intervalMarkers, annualReturn, l
           <g>
             <line x1={beX} x2={beX} y1={padT} y2={H - padB} stroke={T.gold} strokeWidth="1" strokeDasharray="4 3" />
             <circle cx={beX} cy={zeroY} r="4.5" fill={T.gold} />
-            <text x={beX} y={padT - 6} textAnchor="middle" fontFamily={sans} fontSize="10" fill={T.gold} fontWeight="700">Break-even \u00b7 Yr {breakEvenYear}</text>
+            <text x={beX} y={padT - 6} textAnchor="middle" fontFamily={sans} fontSize="10" fill={T.gold} fontWeight="700">Break-even · Yr {breakEvenYear}</text>
           </g>
         )}
         {intervalMarkers.map((p) => (

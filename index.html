@@ -114,6 +114,23 @@ function calcEngine(c) {
   const priceBase = batteryOnly ? (c.batteryPrice || 0) : c.grossPrice;
   const netCost = priceBase + adders - nyserdaApplied - nyStateCredit;
 
+  // Financing overlay: payment structure applied on top of the priced system.
+  const finMode = c.finMode || "cash";
+  const loanDown = c.loanDown || 0;
+  const loanPrincipal = Math.max(netCost - loanDown, 0);
+  const loanN = (c.loanTermYears || 25) * 12;
+  const loanR = (c.loanApr || 0) / 100 / 12;
+  const loanMonthly = loanR > 0
+    ? (loanPrincipal * loanR) / (1 - Math.pow(1 + loanR, -loanN))
+    : (loanN > 0 ? loanPrincipal / loanN : 0);
+  const loanTotal = loanMonthly * loanN + loanDown;
+  const leaseRate = c.leaseRate || 0;
+  const leaseEsc = (c.leaseEscalator || 0) / 100;
+  const leaseTerm = c.leaseTermYears || 25;
+  const leaseY1Monthly = (c.annualProduction * leaseRate) / 12;
+  let leaseTotal = 0, lm = leaseY1Monthly;
+  for (let i = 0; i < leaseTerm; i++) { leaseTotal += lm * 12; lm *= 1 + leaseEsc; }
+
   // El1 (flat) vs voluntary TOU: on a flat rate the battery captures NO arbitrage
   // (no peak/off-peak spread to shift value across), it is backup only. The TOU
   // savings only materialize if the client switches El1 -> voluntary Rate III TOU.
@@ -161,6 +178,8 @@ function calcEngine(c) {
     nyStateCredit, roofAdder, customAdder, priceBase, arbEl1, arbTou, touPayback,
     touFeasible, spreadThin, arbVerified, touEstimate, totalAnnual, payback, lifetime,
     cashflow, breakEvenYear, intervalMarkers, annualReturn,
+    finMode, loanDown, loanMonthly, loanTotal, loanN,
+    leaseRate, leaseEsc, leaseTerm, leaseY1Monthly, leaseTotal,
   };
 }
 
@@ -309,6 +328,52 @@ function ReturnChart({ cashflow, breakEvenYear, intervalMarkers, annualReturn, l
   );
 }
 
+function PaymentComparison({ e, cfg }) {
+  const cols = [];
+  cols.push({ id: "cash", label: "Cash", lines: [
+    ["Upfront", money(e.netCost)],
+    ["Monthly", "$0"],
+    ["25-year outlay", money(e.netCost)],
+  ] });
+  cols.push({ id: "loan", label: "Loan", lines: [
+    ["Down", money(e.loanDown)],
+    ["Monthly", money(e.loanMonthly)],
+    [cfg.loanApr + "% APR / " + (e.loanN / 12) + " yr", ""],
+    ["Total paid", money(e.loanTotal)],
+  ] });
+  if (!e.batteryOnly) cols.push({ id: "lease", label: "Lease (TPO)", lines: [
+    ["Down", "$0"],
+    ["Year-1 monthly", money(e.leaseY1Monthly)],
+    [cfg.leaseEscalator + "% escalator / " + e.leaseTerm + " yr", ""],
+    ["Lifetime payments", money(e.leaseTotal)],
+  ] });
+  return (
+    <div>
+      <div style={{ display: "grid", gridTemplateColumns: `repeat(${cols.length}, 1fr)`, gap: 10 }}>
+        {cols.map((col) => {
+          const active = col.id === e.finMode;
+          return (
+            <div key={col.id} style={{ border: `1px solid ${active ? T.navy : T.border}`, background: active ? T.row : "#FBF8EE", borderTop: `3px solid ${active ? T.gold : T.border}`, padding: 12 }}>
+              <div style={{ fontFamily: serif, fontSize: 15, color: T.navy, fontWeight: 700, marginBottom: 8 }}>
+                {col.label}{active ? "  \u2713" : ""}
+              </div>
+              {col.lines.map(([label, val], i) => (
+                <div key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", padding: "4px 0", borderBottom: i < col.lines.length - 1 ? `1px solid ${T.subtle}` : "none" }}>
+                  <span style={{ fontFamily: val ? serif : sans, fontSize: val ? 12 : 9, color: val ? T.sub : T.muted, textTransform: val ? "none" : "uppercase", letterSpacing: val ? "0" : "0.05em", fontStyle: val ? "normal" : "italic" }}>{label}</span>
+                  {val && <span style={{ fontFamily: serif, fontSize: 13, color: T.navy, fontWeight: 600 }}>{val}</span>}
+                </div>
+              ))}
+            </div>
+          );
+        })}
+      </div>
+      <div style={{ fontFamily: serif, fontStyle: "italic", fontSize: 11, color: T.muted, marginTop: 10, borderTop: `1px solid ${T.subtle}`, paddingTop: 8, lineHeight: 1.5 }}>
+        Cash and loan mean you own the system and keep any incentives. A lease (third-party owned) is $0 down, with the provider keeping ownership and tax benefits. Figures are estimates from the inputs above.
+      </div>
+    </div>
+  );
+}
+
 const Stat = ({ label, value, accent }) => (
   <div style={{ flex: 1, minWidth: 130, borderLeft: `2px solid ${accent || T.border}`, paddingLeft: 12 }}>
     <Eyebrow>{label}</Eyebrow>
@@ -383,6 +448,13 @@ const DEFAULTS = {
   roofScope: "",
   customLabel: "",
   customAdder: 0,
+  finMode: "cash",
+  loanApr: 6.99,
+  loanTermYears: 25,
+  loanDown: 0,
+  leaseRate: 0.30,
+  leaseEscalator: 0,
+  leaseTermYears: 25,
 };
 
 /* Per-client link: the client's data lives in the URL hash (#d=...).
@@ -584,6 +656,28 @@ function ProposalEngineJPM() {
             <input type="checkbox" checked={cfg.nyserdaPreApplied} onChange={(ev) => set("nyserdaPreApplied")(ev.target.checked)} />
             NYSERDA already baked into gross price (prevents double-deduct)
           </label>
+          <div style={{ marginTop: 14, borderTop: `1px solid ${T.subtle}`, paddingTop: 12 }}>
+            <Eyebrow>Financing Structure</Eyebrow>
+            <div style={{ display: "flex", gap: 8, margin: "8px 0 12px" }}>
+              {[{ id: "cash", label: "Cash" }, { id: "loan", label: "Loan" }, { id: "lease", label: "Lease (TPO)" }].map((fo) => (
+                <button key={fo.id} onClick={() => set("finMode")(fo.id)} style={{
+                  fontFamily: sans, fontSize: 11, letterSpacing: "0.05em", textTransform: "uppercase",
+                  padding: "6px 14px", cursor: "pointer",
+                  border: `1px solid ${cfg.finMode === fo.id ? T.navy : T.border}`,
+                  background: cfg.finMode === fo.id ? T.navy : "transparent",
+                  color: cfg.finMode === fo.id ? "#FBF8EE" : T.sub,
+                }}>{fo.label}</button>
+              ))}
+            </div>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(170px, 1fr))", gap: "0 18px" }}>
+              <Field label="Loan APR" value={cfg.loanApr} onChange={set("loanApr")} suffix="%" />
+              <Field label="Loan Term" value={cfg.loanTermYears} onChange={set("loanTermYears")} suffix="yrs" />
+              <Field label="Loan Down Payment" value={cfg.loanDown} onChange={set("loanDown")} suffix="$" />
+              <Field label="Lease Rate" value={cfg.leaseRate} onChange={set("leaseRate")} suffix="$/kWh" />
+              <Field label="Lease Escalator" value={cfg.leaseEscalator} onChange={set("leaseEscalator")} suffix="%/yr" />
+              <Field label="Lease Term" value={cfg.leaseTermYears} onChange={set("leaseTermYears")} suffix="yrs" />
+            </div>
+          </div>
         </div>
       )}
 
@@ -794,6 +888,11 @@ function ProposalEngineJPM() {
                 </Exhibit>
               </div>
             )}
+            <div style={{ gridColumn: "1 / -1" }}>
+              <Exhibit num="7" title="Payment Options" sub="How the system is paid for. Estimates from the inputs above">
+                <PaymentComparison e={e} cfg={cfg} />
+              </Exhibit>
+            </div>
             <div style={{ gridColumn: "1 / -1", background: T.row, borderLeft: `3px solid ${T.navy}`, padding: 16 }}>
               <Eyebrow>Investment Thesis</Eyebrow>
               <div style={{ fontFamily: serif, fontSize: 13, color: T.sub, marginTop: 6, lineHeight: 1.6 }}>

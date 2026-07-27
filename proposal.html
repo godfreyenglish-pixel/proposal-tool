@@ -122,10 +122,10 @@
   body.pdfmode .stepper, body.pdfmode .nav, body.pdfmode .printbtn, body.pdfmode .btnrow, body.pdfmode .bookmark{ display:none !important; }
   body.pdfmode .panel{ display:block !important; margin:0 0 18px; }
   body.pdfmode .panel[data-p="2"], body.pdfmode .panel[data-p="3"]{ break-before:page; page-break-before:always; }
-  body.pdfmode, body.pdfmode .lead, body.pdfmode .stat .v, body.pdfmode .opt h3, body.pdfmode .opt .net, body.pdfmode .cta .big, body.pdfmode .opt .line .lv, body.pdfmode .prepared b, body.pdfmode .brand h1{ color:#141414 !important; }
-  body.pdfmode .brand .sub, body.pdfmode .prepared, body.pdfmode .sub2, body.pdfmode .stat .k, body.pdfmode .stat .foot, body.pdfmode .opt .size, body.pdfmode .opt .netk, body.pdfmode .opt .line .lk, body.pdfmode .foot, body.pdfmode .bar-row .lbl{ color:#5a5a5a !important; }
-  body.pdfmode .lead .accent, body.pdfmode .stat .v.gold, body.pdfmode .cta .rec-net{ color:#B8924A !important; }
-  body.pdfmode .stat .v.green, body.pdfmode .opt .lv.green, body.pdfmode .gift .big{ color:#0a7a52 !important; }
+  body.pdfmode, body.pdfmode .lead, body.pdfmode .stat .v, body.pdfmode .opt h3, body.pdfmode .opt .net, body.pdfmode .cta .big, body.pdfmode .opt .line .lv, body.pdfmode .prepared b, body.pdfmode .brand h1{ color:#0b0b0b !important; }
+  body.pdfmode .brand .sub, body.pdfmode .prepared, body.pdfmode .sub2, body.pdfmode .stat .k, body.pdfmode .stat .foot, body.pdfmode .opt .size, body.pdfmode .opt .netk, body.pdfmode .opt .line .lk, body.pdfmode .foot, body.pdfmode .bar-row .lbl{ color:#4a4a4a !important; }
+  body.pdfmode .lead .accent, body.pdfmode .stat .v.gold, body.pdfmode .cta .rec-net{ color:#8a6a12 !important; }
+  body.pdfmode .stat .v.green, body.pdfmode .opt .lv.green, body.pdfmode .gift .big{ color:#07603f !important; }
   body.pdfmode .stat, body.pdfmode .bars, body.pdfmode .opt, body.pdfmode .cta{ background:#f6f5f2 !important; border:1px solid #d9d5cc !important; }
   body.pdfmode .gift{ background:#f2f8f5 !important; border:1px solid #cfe6db !important; }
   body.pdfmode .gift div{ color:#334150 !important; }
@@ -134,7 +134,7 @@
   body.pdfmode .opt .net{ font-size:26px; }
   body.pdfmode .logo{ background:#B8924A !important; color:#fff !important; }
   body.pdfmode .bar-track{ background:#e7e4dc !important; }
-  body.pdfmode .ribbon{ background:#B8924A !important; color:#fff !important; }
+  body.pdfmode .ribbon{ background:#8a6a12 !important; color:#fff !important; }
   body.pdfmode .pill{ background:#0a7a52 !important; color:#fff !important; }
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
@@ -244,7 +244,7 @@
     document.body.classList.add('pdfmode');
     var el=document.querySelector('.wrap');
     var name=((D&&D.client)?String(D.client).replace(/[^a-z0-9]/gi,'_')+'_':'')+'Rivertown_Proposal.pdf';
-    var opt={ margin:[0.5,0.5,0.6,0.5], filename:name, image:{type:'jpeg',quality:0.98}, html2canvas:{scale:2,backgroundColor:'#ffffff',useCORS:true}, jsPDF:{unit:'in',format:'letter',orientation:'portrait'}, pagebreak:{mode:['css','legacy'],before:['.panel[data-p="2"]','.panel[data-p="3"]'],avoid:['.opt','.stat','.gift','.cta','.bars']} };
+    var opt={ margin:[0.5,0.5,0.6,0.5], filename:name, image:{type:'png'}, html2canvas:{scale:3,backgroundColor:'#ffffff',useCORS:true}, jsPDF:{unit:'in',format:'letter',orientation:'portrait'}, pagebreak:{mode:['css','legacy'],before:['.panel[data-p="2"]','.panel[data-p="3"]'],avoid:['.opt','.stat','.gift','.cta','.bars']} };
     html2pdf().set(opt).from(el).save().then(function(){document.body.classList.remove('pdfmode');}).catch(function(e){document.body.classList.remove('pdfmode');console.error('pdf',e);});
   }
   var money = function(n){ return '$'+Math.round(n).toLocaleString(); };

@@ -116,7 +116,28 @@
     .pc{ display:block !important; margin-top:12px; font-size:12px; color:#333 !important; }
     .foot{ color:#6a6a6a !important; border-color:#d9d5cc !important; }
   }
+  /* PDF capture theme — html2pdf renders screen styles, so mirror the light print look */
+  body.pdfmode{ background:#fff; }
+  body.pdfmode .wrap{ max-width:100%; padding:0; }
+  body.pdfmode .stepper, body.pdfmode .nav, body.pdfmode .printbtn, body.pdfmode .btnrow, body.pdfmode .bookmark{ display:none !important; }
+  body.pdfmode .panel{ display:block !important; margin:0 0 18px; }
+  body.pdfmode .panel[data-p="2"], body.pdfmode .panel[data-p="3"]{ break-before:page; page-break-before:always; }
+  body.pdfmode, body.pdfmode .lead, body.pdfmode .stat .v, body.pdfmode .opt h3, body.pdfmode .opt .net, body.pdfmode .cta .big, body.pdfmode .opt .line .lv, body.pdfmode .prepared b, body.pdfmode .brand h1{ color:#141414 !important; }
+  body.pdfmode .brand .sub, body.pdfmode .prepared, body.pdfmode .sub2, body.pdfmode .stat .k, body.pdfmode .stat .foot, body.pdfmode .opt .size, body.pdfmode .opt .netk, body.pdfmode .opt .line .lk, body.pdfmode .foot, body.pdfmode .bar-row .lbl{ color:#5a5a5a !important; }
+  body.pdfmode .lead .accent, body.pdfmode .stat .v.gold, body.pdfmode .cta .rec-net{ color:#B8924A !important; }
+  body.pdfmode .stat .v.green, body.pdfmode .opt .lv.green, body.pdfmode .gift .big{ color:#0a7a52 !important; }
+  body.pdfmode .stat, body.pdfmode .bars, body.pdfmode .opt, body.pdfmode .cta{ background:#f6f5f2 !important; border:1px solid #d9d5cc !important; }
+  body.pdfmode .gift{ background:#f2f8f5 !important; border:1px solid #cfe6db !important; }
+  body.pdfmode .gift div{ color:#334150 !important; }
+  body.pdfmode .opts{ grid-template-columns:1fr !important; gap:12px; }
+  body.pdfmode .opt{ padding:18px 22px; }
+  body.pdfmode .opt .net{ font-size:26px; }
+  body.pdfmode .logo{ background:#B8924A !important; color:#fff !important; }
+  body.pdfmode .bar-track{ background:#e7e4dc !important; }
+  body.pdfmode .ribbon{ background:#B8924A !important; color:#fff !important; }
+  body.pdfmode .pill{ background:#0a7a52 !important; color:#fff !important; }
 </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </head>
 <body>
 <div class="wrap">
@@ -125,7 +146,7 @@
       <div class="logo">R</div>
       <div><h1>Rivertown Solar</h1><div class="sub">Home Energy Proposal</div></div>
     </div>
-    <button class="printbtn" onclick="window.print()">Save / Print</button>
+    <button class="printbtn" onclick="downloadPdf()">Download PDF</button>
   </div>
 
   <div class="prepared">Prepared for <b id="clientName">your home</b> &middot; <span id="date"></span></div>
@@ -178,7 +199,7 @@
       <div style="font-size:15px;color:var(--muted)">Net <span class="rec-net mono" id="rec_net">&mdash;</span> after incentives &middot; about <span class="mono" style="color:var(--green)" id="rec_y1">&mdash;</span>/yr saved</div>
       <div class="btnrow">
         <a class="btn primary" id="cta_reply" href="#">Reply to get started</a>
-        <button class="btn ghost" onclick="window.print()">Save as PDF</button>
+        <button class="btn ghost" onclick="downloadPdf()">Download PDF</button>
       </div>
       <div class="bookmark">Bookmark this page, this link always rebuilds your exact quote.</div>
       <div class="pc" id="printContact"></div>
@@ -218,6 +239,14 @@
     }catch(e){ return SAMPLE; }
   }
   var D = decode();
+  function downloadPdf(){
+    if(typeof html2pdf==='undefined'){ window.print(); return; }
+    document.body.classList.add('pdfmode');
+    var el=document.querySelector('.wrap');
+    var name=((D&&D.client)?String(D.client).replace(/[^a-z0-9]/gi,'_')+'_':'')+'Rivertown_Proposal.pdf';
+    var opt={ margin:[0.5,0.5,0.6,0.5], filename:name, image:{type:'jpeg',quality:0.98}, html2canvas:{scale:2,backgroundColor:'#ffffff',useCORS:true}, jsPDF:{unit:'in',format:'letter',orientation:'portrait'}, pagebreak:{mode:['css','legacy'],before:['.panel[data-p="2"]','.panel[data-p="3"]'],avoid:['.opt','.stat','.gift','.cta','.bars']} };
+    html2pdf().set(opt).from(el).save().then(function(){document.body.classList.remove('pdfmode');}).catch(function(e){document.body.classList.remove('pdfmode');console.error('pdf',e);});
+  }
   var money = function(n){ return '$'+Math.round(n).toLocaleString(); };
   var moneyK = function(n){ return '$'+Math.round(n/1000)+'k'; };
 

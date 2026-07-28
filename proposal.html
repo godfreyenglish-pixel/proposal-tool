@@ -101,7 +101,7 @@
     .logo{ background:#B8924A !important; color:#fff !important; }
     .prepared{ color:#5a5a5a !important; } .prepared b{ color:#141414 !important; }
     .panel{ display:block !important; break-inside:avoid; page-break-inside:avoid; margin:8px 0 16px; }
-    .panel[data-p="2"], .panel[data-p="3"]{ break-before:page; page-break-before:always; }
+    .panel[data-p="2"], .panel[data-p="3"], .panel[data-p="4"]{ break-before:page; page-break-before:always; }
     .lead{ color:#141414 !important; font-size:18px; } .lead .accent{ color:#B8924A !important; } .sub2{ color:#5a5a5a !important; }
     .stat,.bars{ background:#f6f5f2 !important; border:1px solid #d9d5cc !important; }
     .stat .k,.stat .foot{ color:#5a5a5a !important; } .stat .v{ color:#141414 !important; } .stat .v.gold{ color:#B8924A !important; } .stat .v.green{ color:#0a7a52 !important; }
@@ -121,7 +121,7 @@
   body.pdfmode .wrap{ max-width:100%; padding:0; }
   body.pdfmode .stepper, body.pdfmode .nav, body.pdfmode .printbtn, body.pdfmode .btnrow, body.pdfmode .bookmark{ display:none !important; }
   body.pdfmode .panel{ display:block !important; margin:0 0 18px; }
-  body.pdfmode .panel[data-p="2"], body.pdfmode .panel[data-p="3"]{ break-before:page; page-break-before:always; }
+  body.pdfmode .panel[data-p="2"], body.pdfmode .panel[data-p="3"], body.pdfmode .panel[data-p="4"]{ break-before:page; page-break-before:always; }
   body.pdfmode, body.pdfmode .lead, body.pdfmode .stat .v, body.pdfmode .opt h3, body.pdfmode .opt .net, body.pdfmode .cta .big, body.pdfmode .opt .line .lv, body.pdfmode .prepared b, body.pdfmode .brand h1{ color:#0b0b0b !important; }
   body.pdfmode .brand .sub, body.pdfmode .prepared, body.pdfmode .sub2, body.pdfmode .stat .k, body.pdfmode .stat .foot, body.pdfmode .opt .size, body.pdfmode .opt .netk, body.pdfmode .opt .line .lk, body.pdfmode .foot, body.pdfmode .bar-row .lbl{ color:#4a4a4a !important; }
   body.pdfmode .lead .accent, body.pdfmode .stat .v.gold, body.pdfmode .cta .rec-net{ color:#8a6a12 !important; }
@@ -190,8 +190,23 @@
     <div class="opts" id="opts"></div>
   </div>
 
-  <!-- 4 GET STARTED -->
+  <!-- 3 WARRANTIES -->
   <div class="panel" data-p="3">
+    <div class="lead">Your <span class="accent">coverage</span></div>
+    <div class="sub2">Backed for the life of your system, every component covered.</div>
+    <div class="grid g3">
+      <div class="stat"><div class="k">Performance</div><div class="v gold" id="w_perf">Lifetime</div><div class="foot">system output</div></div>
+      <div class="stat"><div class="k">Workmanship</div><div class="v gold" id="w_work">Lifetime</div><div class="foot">install + roof leaks</div></div>
+      <div class="stat"><div class="k">Labor</div><div class="v gold" id="w_labor">Lifetime</div><div class="foot">service calls</div></div>
+    </div>
+    <div class="bars" style="margin-top:14px">
+      <div style="font-size:12px;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px">Component warranties</div>
+      <div id="warrList"></div>
+    </div>
+  </div>
+
+  <!-- 5 GET STARTED -->
+  <div class="panel" data-p="4">
     <div class="lead">Ready to <span class="accent">lock it in</span>?</div>
     <div class="sub2">Here is the path we would recommend for your home.</div>
     <div class="cta">
@@ -215,7 +230,7 @@
 </div>
 
 <script>
-  var STEPS = ["Where You Are","Your Free Gift","Your Options","Get Started"];
+  var STEPS = ["Where You Are","Your Free Gift","Your Options","Warranties","Get Started"];
   var SAMPLE = {
     client:"Alex", date:"July 27, 2026",
     bill:{ annualKwh:19478, rate:0.43, monthly:692, supply:156, delivery:290, basic:16 },
@@ -224,6 +239,16 @@
       solar:   { kw:12.5, batt:0,    gross:43750, net:30625, year1:5387, payback:8.2, offset:62, life25:210000, backup:0 },
       solbat:  { kw:12.5, batt:25.6, gross:66000, net:46000, year1:6800, payback:9.5, offset:78, life25:265000, backup:14 },
       battery: { kw:0,    batt:25.6, gross:22000, net:15000, year1:1200, payback:12.0,offset:0,  life25:40000,  backup:14 }
+    },
+    warranties:{
+      rivertown:{ performance:"Lifetime", workmanship:"Lifetime", labor:"Lifetime" },
+      components:[
+        {name:"Solar Panels", mfr:"Talesun", term:"25 yr output"},
+        {name:"Microinverters", mfr:"Enphase IQ", term:"25 yr"},
+        {name:"Racking", mfr:"IronRidge", term:"25 yr"},
+        {name:"Monitoring", mfr:"Enphase", term:"Included"},
+        {name:"Battery", mfr:"EG4", term:"10 yr / 10,000 cycles"}
+      ]
     },
     recommended:"solbat",
     replyTo:"godfrey@rivertownsolar.com"
@@ -244,7 +269,7 @@
     document.body.classList.add('pdfmode');
     var el=document.querySelector('.wrap');
     var name=((D&&D.client)?String(D.client).replace(/[^a-z0-9]/gi,'_')+'_':'')+'Rivertown_Proposal.pdf';
-    var opt={ margin:[0.5,0.5,0.6,0.5], filename:name, image:{type:'png'}, html2canvas:{scale:3,backgroundColor:'#ffffff',useCORS:true}, jsPDF:{unit:'in',format:'letter',orientation:'portrait'}, pagebreak:{mode:['css','legacy'],before:['.panel[data-p="2"]','.panel[data-p="3"]'],avoid:['.opt','.stat','.gift','.cta','.bars']} };
+    var opt={ margin:[0.5,0.5,0.6,0.5], filename:name, image:{type:'png'}, html2canvas:{scale:3,backgroundColor:'#ffffff',useCORS:true}, jsPDF:{unit:'in',format:'letter',orientation:'portrait'}, pagebreak:{mode:['css','legacy'],before:['.panel[data-p="2"]','.panel[data-p="3"]','.panel[data-p="4"]'],avoid:['.opt','.stat','.gift','.cta','.bars']} };
     html2pdf().set(opt).from(el).save().then(function(){document.body.classList.remove('pdfmode');}).catch(function(e){document.body.classList.remove('pdfmode');console.error('pdf',e);});
   }
   var money = function(n){ return '$'+Math.round(n).toLocaleString(); };
@@ -322,6 +347,15 @@
     window.scrollTo({top:0,behavior:'smooth'});
   }
   function go(step){ if(idx===STEPS.length-1 && step>0) return; show(idx+step); }
+  if(D.warranties){
+    var rt=D.warranties.rivertown||{};
+    var setW=function(id,v){ var e=document.getElementById(id); if(e&&v) e.textContent=v; };
+    setW('w_perf',rt.performance); setW('w_work',rt.workmanship); setW('w_labor',rt.labor);
+    var comps=D.warranties.components||[];
+    var wh='';
+    comps.forEach(function(c){ wh+='<div style="display:flex;justify-content:space-between;align-items:baseline;padding:8px 0;border-top:1px solid var(--border);font-size:13px"><span style="color:var(--text)">'+c.name+' <span style="color:var(--muted)">\u00b7 '+c.mfr+'</span></span><span style="color:var(--text);font-weight:600" class="mono">'+c.term+'</span></div>'; });
+    var wl=document.getElementById('warrList'); if(wl) wl.innerHTML=wh;
+  }
   show(0);
 </script>
 </body>

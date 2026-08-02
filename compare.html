@@ -68,6 +68,19 @@
   .rub .bar i{display:block;height:100%}
   .rub .n{width:34px;text-align:right;font-weight:700}
   .rub .n.us{color:var(--gold)} .rub .n.them{color:var(--text)}
+  /* The figure each score is derived from. A bare "100" reads as a perfect
+     mark; "100  $41,880" reads as what it is, one quote against the other. */
+  .rub .rw{width:76px;text-align:right;font-weight:500;font-size:11px;color:#6B7280;white-space:nowrap}
+  /* Each quote's bar, score and figure travel as one unit, so the whole group
+     can move below the label on a narrow screen without the columns tangling. */
+  .rub .side{display:flex;align-items:center;gap:12px;justify-content:flex-end}
+  .rub .side .who{display:none}
+  .rub .totrow{border-top:1px solid var(--border);margin-top:4px;padding-top:10px;font-weight:700;color:var(--text)}
+  /* Gold vs grey is not enough of a cue on its own; name the columns. */
+  .rub .hd{border-top:0;padding-bottom:4px;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:#6B7280}
+  .rub .hd .cu{color:var(--gold)}
+  .rub .hdc{width:254px;text-align:right}
+  .rub .note2{font-size:12px;color:var(--muted);line-height:1.55;margin-top:10px}
 
   .cta{margin-top:22px;border-radius:16px;padding:24px;text-align:center;background:var(--card2);border:1px solid var(--border)}
   .cta.counter{background:linear-gradient(135deg,rgba(251,191,36,.12),transparent);border-color:rgba(251,191,36,.45)}
@@ -84,7 +97,19 @@
     .wrap{padding:16px 14px 40px}
     .lead{font-size:18px} .verdict .big{font-size:19px}
     td,th{font-size:12.5px}
-    .rub .bar{width:74px}
+    /* Phones: the label gets its own line and each quote self-labels, because
+       squeezing five columns into 390px wraps every label into a tall stack. */
+    .rub .r{flex-wrap:wrap;gap:6px 10px;padding:11px 0;font-size:12.5px}
+    .rub .lab{flex:0 0 100%;color:var(--text);font-weight:600}
+    .rub .bar{display:none}
+    .rub .side{flex:1 1 0;min-width:0;gap:3px 7px;justify-content:flex-start;align-items:baseline;flex-wrap:wrap}
+    /* Own line, so a long installer name never pushes the score off-axis. */
+    .rub .side .who{display:block;flex:0 0 100%;font-size:10px;letter-spacing:.05em;text-transform:uppercase;color:#6B7280}
+    .rub .side.us .who{color:var(--gold)}
+    .rub .n{width:auto;text-align:left}
+    .rub .rw{width:auto;text-align:left}
+    .rub .hd{display:none}
+    .rub .totrow .side{justify-content:flex-start}
   }
 
   /* print + pdf: light theme, same treatment as the main proposal */
@@ -103,6 +128,12 @@
     background:#f6f5f2!important;border:1px solid #d9d5cc!important}
   body.pdfmode .note{background:#fbf6e7!important;border:1px solid #e3d5a8!important;color:#3a3a3a!important}
   body.pdfmode td,body.pdfmode .claim .row,body.pdfmode .rub .r{border-top-color:#ddd8ce!important}
+  /* The raw figures and column names carry real meaning now, so they have to
+     survive the light PDF the client saves and forwards. */
+  body.pdfmode .rub .rw,body.pdfmode .rub .hd,body.pdfmode .rub .side .who{color:#6a6a6a!important}
+  body.pdfmode .rub .hd .cu,body.pdfmode .rub .side.us .who{color:#8a6a12!important}
+  body.pdfmode .rub .bar{background:#e3ded4!important}
+  body.pdfmode .rub .n.them,body.pdfmode .rub .totrow{color:#1a1a1a!important}
   body.pdfmode .sec{break-inside:avoid;page-break-inside:avoid}
 </style>
 </head>
@@ -181,6 +212,19 @@
 
   var US = D.us, THEM = D.them, V = D.verdict || {}, A = D.assume || {};
   var themWon = V.winner === 'them';
+  // No scorable rows means no verdict at all. Printing "Rivertown Solar comes
+  // out ahead" off an empty rubric is the one failure this page cannot afford.
+  var noVerdict = (V.scored === false) || !(V.rows && V.rows.length);
+
+  // The figure behind each rubric score. Mirrors __cqRawFmt in the simulator.
+  function rawFmt(v, fmt) {
+    if (v == null || !isFinite(v)) return '';
+    if (fmt === 'money') return money(v);
+    if (fmt === 'moneyYr') return money(v) + '/yr';
+    if (fmt === 'years') return (Math.round(v * 10) / 10) + ' yrs';
+    if (fmt === 'kwh') return (Math.round(v * 10) / 10) + ' kWh';
+    return String(v);
+  }
 
   document.getElementById('clientName').textContent = D.client || 'your home';
   document.getElementById('date').textContent = D.date || '';
@@ -196,7 +240,11 @@
   var lifeGap = (THEM.life != null && US.life != null) ? THEM.life - US.life : null;
 
   var by = [];
-  if (themWon) {
+  if (noVerdict) {
+    by.push('<b>Neither quote can be scored on the figures currently on file.</b>');
+    by.push('The systems, prices and warranties below are still accurate and worth reading side by side.');
+    by.push('Ask Rivertown to rerun this with your actual annual usage and the scoring will fill in.');
+  } else if (themWon) {
     by.push('<b>' + esc(THEM.name) + ' scores ' + margin + ' point' + (margin === 1 ? '' : 's') + ' higher.</b>');
     if (priceGap != null && priceGap > 0) by.push('Their quote is <b>' + money(priceGap) + ' less</b> up front.');
     if (lifeGap != null && lifeGap > 0) by.push('They come out <b>' + money(lifeGap) + ' ahead</b> over ' + (A.term || 25) + ' years on matched assumptions.');
@@ -209,16 +257,18 @@
   }
 
   document.getElementById('verdict').innerHTML =
-    '<div class="verdict ' + (themWon ? 'lose' : 'win') + '">' +
-      '<div class="kicker">On the scoring below</div>' +
+    '<div class="verdict ' + (noVerdict ? '' : (themWon ? 'lose' : 'win')) + '">' +
+      '<div class="kicker">' + (noVerdict ? 'Side by side' : 'On the scoring below') + '</div>' +
       '<div class="big" style="margin-top:5px">' +
-        (themWon ? esc(THEM.name) + ' comes out ahead' : 'Rivertown Solar comes out ahead') +
+        (noVerdict ? 'Both quotes, on the same assumptions'
+                   : (themWon ? esc(THEM.name) + ' comes out ahead' : 'Rivertown Solar comes out ahead')) +
       '</div>' +
       '<div class="by">' + by.join(' ') + '</div>' +
+      (noVerdict ? '' :
       '<div class="scores">' +
         '<div class="score us"><div class="n">Rivertown</div><div class="v">' + (V.us != null ? V.us : '—') + '</div></div>' +
         '<div class="score them"><div class="n">' + esc(THEM.name) + '</div><div class="v">' + (V.them != null ? V.them : '—') + '</div></div>' +
-      '</div>' +
+      '</div>') +
     '</div>';
 
   // ------------------------------------------------------------ assumptions --
@@ -242,7 +292,11 @@
   g += row('Price after incentives', money(US.net), money(THEM.net));
   g += row('What the battery earns each year', money(US.batteryAnnual), money(THEM.batteryAnnual || 0),
            THEM.batteryAnnual ? '' : (THEM.usableKwh ? 'Their proposal models the battery as backup only' : 'No battery in their quote'));
-  g += row('Savings over ' + (A.term || 25) + ' years', money(US.life), money(THEM.life), 'Same assumptions on both sides');
+  // Both figures are savings MINUS the system price. They were not always: our
+  // side used to carry gross savings while theirs carried net, which put two
+  // different measurements in one row and flattered this column.
+  g += row((A.term || 25) + '-year savings, after paying for the system', money(US.life), money(THEM.life),
+           'Same assumptions on both sides, and both net of what you pay for the system');
   g += row('Battery warranty', US.batteryWarrantyYrs ? US.batteryWarrantyYrs + ' yrs' : '—',
                                THEM.batteryWarrantyYrs ? THEM.batteryWarrantyYrs + ' yrs' : '—');
   g += row('Installer coverage', esc(US.installerWarranty || 'Lifetime'),
@@ -271,20 +325,56 @@
   }
 
   // ------------------------------------------------------------- the rubric --
-  document.getElementById('rubLead').textContent = V.excludedBattery
-    ? ('Battery earnings and backup capability are not scored, because ' +
-       (V.excludedBecause === 'them' ? THEM.name + '’s quote does not include a battery' : 'this Rivertown configuration does not include a battery') +
-       '. Their weight has been spread across the categories below.')
-    : 'Every category and its weight is shown. Nothing is hidden behind the total.';
+  // Say what the number means BEFORE showing it. 100 is the better of these two
+  // quotes on that row, not a mark out of a hundred, and a client who assumes
+  // otherwise will read a column of 100s as a scorecard written to win.
+  var lead = ['In each row the better of the two quotes is set to 100 and the other is shown in ' +
+              'proportion to it. These are comparisons between these two quotes, not marks out of a hundred. ' +
+              'The figure behind each score is printed beside it.'];
+  if (V.excludedBattery) {
+    lead.push('Battery earnings and backup capability are not scored, because ' +
+      (V.excludedBecause === 'them' ? THEM.name + '’s quote does not include a battery'
+                                    : 'this Rivertown configuration does not include a battery') +
+      '. Scoring a quote on something it never bid would decide the result before the numbers did. ' +
+      'Their weight has been spread across the categories below.');
+  }
+  if (V.dropped && V.dropped.length) {
+    lead.push('Not scored on the figures currently on file: ' +
+      V.dropped.map(function (d) { return d.label; }).join(', ') +
+      '. Neither quote produces a positive number there, so there is nothing to compare rather than a tie at zero. ' +
+      'That usually means the annual usage on file needs updating, which is worth asking Rivertown to rerun.');
+  }
+  document.getElementById('rubLead').textContent = lead.join(' ');
 
-  document.getElementById('rubric').innerHTML = (V.rows || []).map(function (r) {
+  document.getElementById('rubric').innerHTML =
+    ((V.rows && V.rows.length)
+      ? '<div class="r hd"><span class="lab"></span>' +
+        '<span class="hdc cu">Rivertown</span><span class="hdc">' + esc(THEM.name) + '</span></div>'
+      : '') +
+    (V.rows || []).map(function (r) {
     var u = Math.round((r.us || 0) * 100), t = Math.round((r.them || 0) * 100);
+    function side(cls, pct, colour, score, raw) {
+      return '<span class="side ' + cls + '">' +
+        '<span class="who">' + (cls === 'us' ? 'Rivertown' : esc(THEM.name)) + '</span>' +
+        '<span class="bar"><i style="width:' + pct + '%;background:' + colour + '"></i></span>' +
+        '<span class="n ' + cls + '">' + score + '</span>' +
+        '<span class="rw">' + esc(raw) + '</span></span>';
+    }
     return '<div class="r">' +
       '<span class="lab">' + esc(r.label) + ' <span class="w">' + r.w + '%</span></span>' +
-      '<span class="bar"><i style="width:' + u + '%;background:var(--gold)"></i></span><span class="n us">' + u + '</span>' +
-      '<span class="bar"><i style="width:' + t + '%;background:#6B7280"></i></span><span class="n them">' + t + '</span>' +
+      side('us', u, 'var(--gold)', u, rawFmt(r.usRaw, r.fmt)) +
+      side('them', t, '#6B7280', t, rawFmt(r.themRaw, r.fmt)) +
       '</div>';
-  }).join('') || '<div style="color:var(--muted);font-size:12.5px">No scoring detail supplied.</div>';
+  }).join('') +
+  ((V.rows && V.rows.length && V.us != null)
+    ? '<div class="r totrow"><span class="lab">Total</span>' +
+      '<span class="side us"><span class="who">Rivertown</span><span class="bar" style="background:transparent"></span>' +
+        '<span class="n us">' + V.us + '</span><span class="rw"></span></span>' +
+      '<span class="side them"><span class="who">' + esc(THEM.name) + '</span><span class="bar" style="background:transparent"></span>' +
+        '<span class="n them">' + V.them + '</span><span class="rw"></span></span>' +
+      '</div>'
+    : '<div class="note2">There is not enough on file to score these two quotes against each other yet. ' +
+      'Everything above still stands on its own.</div>');
 
   // -------------------------------------------------------------- the close --
   var mailSubj, mailBody, closeHtml;

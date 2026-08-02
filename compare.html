@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Side by Side · Rivertown Solar</title>
+<meta name="robots" content="noindex">
+<style>
+  :root{
+    --bg:#030712; --card:#0B1220; --card2:#111827; --border:#1F2937;
+    --text:#F9FAFB; --muted:#9CA3AF; --gold:#FBBF24; --green:#10B981; --red:#EF4444;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;line-height:1.5;-webkit-font-smoothing:antialiased}
+  .mono{font-family:"Geist Mono",ui-monospace,SFMono-Regular,Menlo,monospace}
+  .wrap{max-width:960px;margin:0 auto;padding:24px 20px 60px}
+  .topbar{display:flex;justify-content:space-between;align-items:center;gap:12px;padding-bottom:18px;border-bottom:1px solid var(--border)}
+  .brand{display:flex;align-items:center;gap:10px}
+  .logo{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,var(--gold),#F59E0B);display:flex;align-items:center;justify-content:center;font-weight:800;color:#3a2c00;font-size:18px}
+  .brand h1{font-size:15px;font-weight:700;letter-spacing:.2px}
+  .brand .sub{font-size:11px;color:var(--muted);letter-spacing:1px;text-transform:uppercase}
+  .printbtn{background:var(--card2);border:1px solid var(--border);color:var(--text);border-radius:9px;padding:9px 16px;font-size:13px;font-weight:600;cursor:pointer}
+  .printbtn:hover{border-color:var(--gold)}
+  .prepared{margin:18px 0 6px;font-size:13px;color:var(--muted)}
+
+  .sec{margin-top:22px;break-inside:avoid;page-break-inside:avoid}
+  .lead{font-size:20px;font-weight:800;margin-bottom:4px}
+  .lead .accent{color:var(--gold)}
+  .sub2{color:var(--muted);font-size:13px;margin-bottom:14px;max-width:74ch}
+  .kicker{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;font-weight:700}
+  .card{background:var(--card2);border:1px solid var(--border);border-radius:14px;padding:18px}
+
+  .verdict{border-radius:16px;padding:22px;border:1px solid var(--border);background:var(--card2)}
+  .verdict.win{background:linear-gradient(135deg,rgba(251,191,36,.12),transparent);border-color:rgba(251,191,36,.4)}
+  .verdict.lose{background:linear-gradient(135deg,rgba(59,130,246,.10),transparent);border-color:rgba(59,130,246,.35)}
+  .verdict .big{font-size:23px;font-weight:800;letter-spacing:-.01em}
+  .verdict .by{font-size:14px;color:var(--muted);margin-top:6px;line-height:1.6}
+  .scores{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap}
+  .score{flex:1;min-width:150px;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:13px 15px}
+  .score .n{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+  .score .v{font-size:27px;font-weight:800;margin-top:2px}
+  .score.us .v{color:var(--gold)} .score.them .v{color:var(--text)}
+
+  table{width:100%;border-collapse:collapse}
+  th{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:700;padding:0 0 8px;text-align:right}
+  th.k{text-align:left}
+  th.us{color:var(--gold)}
+  td{padding:9px 0;font-size:13.5px;border-top:1px solid var(--border);text-align:right;font-weight:700}
+  td.k{text-align:left;font-weight:400;color:var(--muted)}
+  td.k small{display:block;font-size:11px;color:#6B7280;font-weight:400}
+  td.us{padding-right:16px}
+  .note{margin-top:12px;padding:12px 14px;border-radius:11px;background:rgba(251,191,36,.09);border:1px solid rgba(251,191,36,.3);font-size:12.5px;line-height:1.6}
+
+  .claim{margin-top:12px;padding:16px;border-radius:12px;background:var(--card);border:1px solid var(--border)}
+  .claim .row{display:flex;justify-content:space-between;align-items:baseline;padding:9px 0;border-top:1px solid var(--border);font-size:13.5px;gap:14px}
+  .claim .row:first-of-type{border-top:0}
+  .claim .row .lk{color:var(--muted)}
+  .claim .row .lv{font-weight:800}
+  .claim .row .lv.down{color:var(--gold)}
+  .claim .why{font-size:12.5px;color:var(--muted);line-height:1.65;margin-top:12px;padding-top:12px;border-top:1px solid var(--border)}
+
+  .rub{margin-top:10px}
+  .rub .r{display:flex;align-items:center;gap:12px;padding:7px 0;font-size:12.5px;border-top:1px solid var(--border)}
+  .rub .r:first-child{border-top:0}
+  .rub .lab{flex:1;color:var(--muted)}
+  .rub .w{color:#6B7280;font-size:11px}
+  .rub .bar{width:120px;height:6px;border-radius:4px;background:var(--border);overflow:hidden;display:flex}
+  .rub .bar i{display:block;height:100%}
+  .rub .n{width:34px;text-align:right;font-weight:700}
+  .rub .n.us{color:var(--gold)} .rub .n.them{color:var(--text)}
+
+  .cta{margin-top:22px;border-radius:16px;padding:24px;text-align:center;background:var(--card2);border:1px solid var(--border)}
+  .cta.counter{background:linear-gradient(135deg,rgba(251,191,36,.12),transparent);border-color:rgba(251,191,36,.45)}
+  .cta .big{font-size:19px;font-weight:800}
+  .cta .p{font-size:13.5px;color:var(--muted);margin-top:8px;line-height:1.65;max-width:62ch;margin-left:auto;margin-right:auto}
+  .btnrow{display:flex;gap:10px;justify-content:center;margin-top:16px;flex-wrap:wrap}
+  .btn{border-radius:10px;padding:12px 22px;font-size:14px;font-weight:800;cursor:pointer;text-decoration:none;display:inline-block;border:none}
+  .btn.primary{background:linear-gradient(135deg,var(--gold),#F59E0B);color:#3a2c00}
+  .btn.ghost{background:transparent;border:1px solid var(--border);color:var(--text)}
+  .pc{display:none;font-size:12.5px;color:var(--muted);margin-top:12px}
+  .foot{margin-top:34px;padding-top:14px;border-top:1px solid var(--border);font-size:10.5px;color:var(--muted);line-height:1.6}
+
+  @media(max-width:640px){
+    .wrap{padding:16px 14px 40px}
+    .lead{font-size:18px} .verdict .big{font-size:19px}
+    td,th{font-size:12.5px}
+    .rub .bar{width:74px}
+  }
+
+  /* print + pdf: light theme, same treatment as the main proposal */
+  body.pdfmode{background:#fff}
+  body.pdfmode .wrap{max-width:100%;padding:0}
+  body.pdfmode .printbtn,body.pdfmode .btnrow{display:none!important}
+  body.pdfmode .pc{display:block!important}
+  body.pdfmode,body.pdfmode .lead,body.pdfmode .verdict .big,body.pdfmode .cta .big,
+  body.pdfmode td,body.pdfmode .score .v,body.pdfmode .claim .row .lv,body.pdfmode .brand h1{color:#0b0b0b!important}
+  body.pdfmode .sub2,body.pdfmode .prepared,body.pdfmode .brand .sub,body.pdfmode .kicker,
+  body.pdfmode th,body.pdfmode td.k,body.pdfmode .verdict .by,body.pdfmode .cta .p,
+  body.pdfmode .claim .row .lk,body.pdfmode .claim .why,body.pdfmode .rub .lab,body.pdfmode .foot{color:#4a4a4a!important}
+  body.pdfmode .lead .accent,body.pdfmode th.us,body.pdfmode .score.us .v,
+  body.pdfmode .claim .row .lv.down,body.pdfmode .rub .n.us{color:#8a6a12!important}
+  body.pdfmode .card,body.pdfmode .verdict,body.pdfmode .score,body.pdfmode .claim,body.pdfmode .cta{
+    background:#f6f5f2!important;border:1px solid #d9d5cc!important}
+  body.pdfmode .note{background:#fbf6e7!important;border:1px solid #e3d5a8!important;color:#3a3a3a!important}
+  body.pdfmode td,body.pdfmode .claim .row,body.pdfmode .rub .r{border-top-color:#ddd8ce!important}
+  body.pdfmode .sec{break-inside:avoid;page-break-inside:avoid}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="topbar">
+    <div class="brand">
+      <div class="logo">R</div>
+      <div><h1>Rivertown Solar</h1><div class="sub">Side-by-side comparison</div></div>
+    </div>
+    <button class="printbtn" onclick="downloadPdf()">Download PDF</button>
+  </div>
+
+  <div class="prepared">Prepared for <b id="clientName">your home</b> &middot; <span id="date"></span></div>
+
+  <div class="sec"><div id="verdict"></div></div>
+
+  <div class="sec">
+    <div class="lead">The two <span class="accent">systems</span></div>
+    <div class="sub2" id="assumeLine"></div>
+    <div class="card"><table id="grid"></table><div id="mismatch"></div></div>
+  </div>
+
+  <div class="sec" id="claimSec">
+    <div class="lead">What <span class="accent" id="claimWho">they</span> projected</div>
+    <div class="sub2">Their system, their price, their production. The only thing changed is the assumptions, and both are shown.</div>
+    <div class="claim" id="claimBox"></div>
+  </div>
+
+  <div class="sec">
+    <div class="lead">How this was <span class="accent">scored</span></div>
+    <div class="sub2" id="rubLead"></div>
+    <div class="card"><div class="rub" id="rubric"></div></div>
+  </div>
+
+  <div class="sec"><div id="close"></div></div>
+
+  <div class="foot" id="foot"></div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  var SAMPLE = {
+    client: 'your home', date: '', replyTo: 'godfrey@rivertownsolar.com',
+    assume: {usageKwh: 10950, rate: 0.38, escalator: 0.033, basicCharge: 22, term: 25, theirTerm: 20},
+    us: {name: 'Rivertown Solar', kw: 8, batteryKwh: 32, usableKwh: 25.6, contKw: 24, net: 46310,
+         life: 137238, batteryAnnual: 656, batteryWarrantyYrs: 10, installerWarranty: 'Lifetime', battery: 'EG4 16K x2'},
+    them: {name: 'the other installer', option: '', kw: 6.16, usableKwh: 13.5, contKw: 11.5, net: 8885,
+           life: 134419, batteryAnnual: 0, batteryWarrantyYrs: 10, installerWarrantyYrs: 25,
+           battery: 'Tesla Powerwall 3', panel: '440W'},
+    claim: null, mismatch: null,
+    verdict: {us: 80, them: 65, winner: 'us', excludedBattery: false, excludedBecause: null, rows: []}
+  };
+
+  function b64urlDecode(raw) {
+    var s = String(raw).replace(/-/g, '+').replace(/_/g, '/');
+    while (s.length % 4) s += '=';
+    try { return decodeURIComponent(escape(atob(s))); } catch (e) { return atob(s); }
+  }
+  function decode() {
+    try {
+      var raw = new URLSearchParams(location.search).get('p');
+      if (!raw) return SAMPLE;
+      var d = JSON.parse(b64urlDecode(raw));
+      return Object.assign({}, SAMPLE, d);
+    } catch (e) { return SAMPLE; }
+  }
+
+  var D = decode();
+  var money = function (n) { return '$' + Math.round(n || 0).toLocaleString(); };
+  var esc = function (t) { return String(t == null ? '' : t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); };
+  var num = function (n, d) { return (n == null) ? '—' : Number(n).toFixed(d == null ? 1 : d); };
+
+  var US = D.us, THEM = D.them, V = D.verdict || {}, A = D.assume || {};
+  var themWon = V.winner === 'them';
+
+  document.getElementById('clientName').textContent = D.client || 'your home';
+  document.getElementById('date').textContent = D.date || '';
+  document.getElementById('claimWho').textContent = THEM.name || 'they';
+
+  // ---------------------------------------------------------------- verdict --
+  // When the other quote wins, say by how much and in which categories. Burying
+  // that would make every other number on the page worth less.
+  var margin = Math.abs((V.us || 0) - (V.them || 0));
+  var beatOn = (V.rows || []).filter(function (r) { return r.them > r.us + 0.001; })
+                             .map(function (r) { return r.label.toLowerCase(); });
+  var priceGap = (THEM.net != null && US.net != null) ? US.net - THEM.net : null;
+  var lifeGap = (THEM.life != null && US.life != null) ? THEM.life - US.life : null;
+
+  var by = [];
+  if (themWon) {
+    by.push('<b>' + esc(THEM.name) + ' scores ' + margin + ' point' + (margin === 1 ? '' : 's') + ' higher.</b>');
+    if (priceGap != null && priceGap > 0) by.push('Their quote is <b>' + money(priceGap) + ' less</b> up front.');
+    if (lifeGap != null && lifeGap > 0) by.push('They come out <b>' + money(lifeGap) + ' ahead</b> over ' + (A.term || 25) + ' years on matched assumptions.');
+    if (beatOn.length) by.push('They lead on ' + esc(beatOn.join(', ')) + '.');
+  } else {
+    by.push('<b>Rivertown scores ' + margin + ' point' + (margin === 1 ? '' : 's') + ' higher.</b>');
+    if (priceGap != null && priceGap > 0) by.push('Rivertown costs <b>' + money(priceGap) + ' more</b> up front.');
+    if (lifeGap != null && lifeGap < 0) by.push('Rivertown returns <b>' + money(-lifeGap) + ' more</b> over ' + (A.term || 25) + ' years on matched assumptions.');
+    if (beatOn.length) by.push('' + esc(THEM.name) + ' still leads on ' + esc(beatOn.join(', ')) + '.');
+  }
+
+  document.getElementById('verdict').innerHTML =
+    '<div class="verdict ' + (themWon ? 'lose' : 'win') + '">' +
+      '<div class="kicker">On the scoring below</div>' +
+      '<div class="big" style="margin-top:5px">' +
+        (themWon ? esc(THEM.name) + ' comes out ahead' : 'Rivertown Solar comes out ahead') +
+      '</div>' +
+      '<div class="by">' + by.join(' ') + '</div>' +
+      '<div class="scores">' +
+        '<div class="score us"><div class="n">Rivertown</div><div class="v">' + (V.us != null ? V.us : '—') + '</div></div>' +
+        '<div class="score them"><div class="n">' + esc(THEM.name) + '</div><div class="v">' + (V.them != null ? V.them : '—') + '</div></div>' +
+      '</div>' +
+    '</div>';
+
+  // ------------------------------------------------------------ assumptions --
+  document.getElementById('assumeLine').textContent =
+    'Both columns use the same assumptions: ' + Math.round(A.usageKwh || 0).toLocaleString() + ' kWh/yr, $' +
+    Number(A.rate || 0).toFixed(2) + '/kWh, ' + (Number(A.escalator || 0) * 100).toFixed(1) +
+    '% annual utility increase, and the ' + money(A.basicCharge) +
+    '/mo service charge that is billed even at full offset. Their hardware and their price are exactly as quoted.';
+
+  // -------------------------------------------------------------- the table --
+  function row(label, a, b, sub) {
+    return '<tr><td class="k">' + esc(label) + (sub ? '<small>' + esc(sub) + '</small>' : '') + '</td>' +
+           '<td class="us">' + a + '</td><td>' + b + '</td></tr>';
+  }
+  var g = '<thead><tr><th class="k"></th><th class="us">Rivertown</th><th>' + esc(THEM.name) + '</th></tr></thead><tbody>';
+  g += row('Solar', US.kw ? num(US.kw, 2) + ' kW' : 'not included', THEM.kw ? num(THEM.kw, 2) + ' kW' : 'not included');
+  g += row('Battery', US.battery ? esc(US.battery) : (US.batteryKwh ? US.batteryKwh + ' kWh' : 'not included'),
+                      THEM.battery ? esc(THEM.battery) : (THEM.usableKwh ? THEM.usableKwh + ' kWh' : 'not included'));
+  g += row('Usable storage', US.usableKwh ? num(US.usableKwh) + ' kWh' : '—', THEM.usableKwh ? num(THEM.usableKwh) + ' kWh' : '—');
+  g += row('Continuous power', US.contKw ? num(US.contKw) + ' kW' : '—', THEM.contKw ? num(THEM.contKw) + ' kW' : '—');
+  g += row('Price after incentives', money(US.net), money(THEM.net));
+  g += row('What the battery earns each year', money(US.batteryAnnual), money(THEM.batteryAnnual || 0),
+           THEM.batteryAnnual ? '' : (THEM.usableKwh ? 'Their proposal models the battery as backup only' : 'No battery in their quote'));
+  g += row('Savings over ' + (A.term || 25) + ' years', money(US.life), money(THEM.life), 'Same assumptions on both sides');
+  g += row('Battery warranty', US.batteryWarrantyYrs ? US.batteryWarrantyYrs + ' yrs' : '—',
+                               THEM.batteryWarrantyYrs ? THEM.batteryWarrantyYrs + ' yrs' : '—');
+  g += row('Installer coverage', esc(US.installerWarranty || 'Lifetime'),
+                                 THEM.installerWarrantyYrs ? THEM.installerWarrantyYrs + ' yrs' : '—');
+  g += '</tbody>';
+  document.getElementById('grid').innerHTML = g;
+  document.getElementById('mismatch').innerHTML = D.mismatch ? '<div class="note">' + esc(D.mismatch) + '</div>' : '';
+
+  // ------------------------------------------------------- the claim, shown --
+  // Consistent with what the comparison tool already shows on screen.
+  if (D.claim && D.claim.stated != null && D.claim.corrected != null) {
+    var c = D.claim, gap = c.stated - c.corrected;
+    document.getElementById('claimBox').innerHTML =
+      '<div class="row"><span class="lk">' + esc(THEM.name) + ' projects, over ' + (c.term || 20) + ' years</span>' +
+        '<span class="lv">' + money(c.stated) + '</span></div>' +
+      '<div class="row"><span class="lk">The same system, recalculated on the assumptions above</span>' +
+        '<span class="lv down">' + money(c.corrected) + '</span></div>' +
+      '<div class="row"><span class="lk">Difference</span><span class="lv">' + money(gap) + '</span></div>' +
+      '<div class="why">Their figure assumes electricity prices rise <b>' + num(c.theirEscalator, 1) +
+        '% every year</b> and that the utility bill goes to zero. This page uses <b>' +
+        (Number(A.escalator || 0) * 100).toFixed(1) + '%</b>, which matches approved Con Edison filings, and keeps the monthly service charge ' +
+        'that is billed even when a system covers all of your usage. Nothing about their equipment or their price has been changed. ' +
+        'It is worth asking them to show their working.</div>';
+  } else {
+    document.getElementById('claimSec').style.display = 'none';
+  }
+
+  // ------------------------------------------------------------- the rubric --
+  document.getElementById('rubLead').textContent = V.excludedBattery
+    ? ('Battery earnings and backup capability are not scored, because ' +
+       (V.excludedBecause === 'them' ? THEM.name + '’s quote does not include a battery' : 'this Rivertown configuration does not include a battery') +
+       '. Their weight has been spread across the categories below.')
+    : 'Every category and its weight is shown. Nothing is hidden behind the total.';
+
+  document.getElementById('rubric').innerHTML = (V.rows || []).map(function (r) {
+    var u = Math.round((r.us || 0) * 100), t = Math.round((r.them || 0) * 100);
+    return '<div class="r">' +
+      '<span class="lab">' + esc(r.label) + ' <span class="w">' + r.w + '%</span></span>' +
+      '<span class="bar"><i style="width:' + u + '%;background:var(--gold)"></i></span><span class="n us">' + u + '</span>' +
+      '<span class="bar"><i style="width:' + t + '%;background:#6B7280"></i></span><span class="n them">' + t + '</span>' +
+      '</div>';
+  }).join('') || '<div style="color:var(--muted);font-size:12.5px">No scoring detail supplied.</div>';
+
+  // -------------------------------------------------------------- the close --
+  var mailSubj, mailBody, closeHtml;
+  if (themWon) {
+    mailSubj = 'Counter offer request' + (THEM.name ? ' (' + THEM.name + ')' : '');
+    mailBody = [
+      'I compared Rivertown against ' + (THEM.name || 'another installer') + ' on your tool.',
+      '',
+      (THEM.name || 'They') + ' came out ahead by ' + margin + ' points.',
+      (priceGap != null && priceGap > 0 ? 'Their price is ' + money(priceGap) + ' lower.' : ''),
+      (beatOn.length ? 'They lead on ' + beatOn.join(', ') + '.' : ''),
+      '',
+      'Can you put a counter offer together?'
+    ].filter(Boolean).join('\n');
+    closeHtml =
+      '<div class="cta counter">' +
+        '<div class="big">Ask Rivertown for a counter offer</div>' +
+        '<div class="p">This comparison is not the end of the conversation. Send it over and Rivertown will go through ' +
+          esc(THEM.name) + '’s quote line by line and come back with a revised number, or tell you straight that ' +
+          'the other offer is the better one for your home. Either answer is useful to you.</div>' +
+        '<div class="btnrow"><a class="btn primary" id="ctaMain" href="#">Request a counter offer</a>' +
+        '<button class="btn ghost" onclick="downloadPdf()">Download PDF</button></div>' +
+        '<div class="pc" id="printContact"></div>' +
+      '</div>';
+  } else {
+    mailSubj = 'Questions on the side-by-side';
+    mailBody = 'I looked at the Rivertown vs ' + (THEM.name || 'other installer') + ' comparison. I have some questions.';
+    closeHtml =
+      '<div class="cta">' +
+        '<div class="big">Questions on any line above?</div>' +
+        '<div class="p">Every figure here comes from the two quotes themselves, run on one set of assumptions. ' +
+          'If anything looks wrong, say so and it gets corrected.</div>' +
+        '<div class="btnrow"><a class="btn primary" id="ctaMain" href="#">Reply with questions</a>' +
+        '<button class="btn ghost" onclick="downloadPdf()">Download PDF</button></div>' +
+        '<div class="pc" id="printContact"></div>' +
+      '</div>';
+  }
+  document.getElementById('close').innerHTML = closeHtml;
+  var cta = document.getElementById('ctaMain');
+  if (cta && D.replyTo) cta.href = 'mailto:' + D.replyTo + '?subject=' + encodeURIComponent(mailSubj) + '&body=' + encodeURIComponent(mailBody);
+  var pc = document.getElementById('printContact');
+  if (pc && D.replyTo) pc.textContent = 'Reply to ' + D.replyTo + ' and we will pick it up from there.';
+
+  document.getElementById('foot').innerHTML =
+    'Figures for the other quote are read from the proposal that was uploaded and were confirmed before this page was made. ' +
+    'Both columns are projections, not guarantees, and actual results vary with weather, usage, roof, occupancy and rate-plan terms. ' +
+    'The federal residential tax credit expired 12/31/2025 and is not included on either side. Prepared by Rivertown Solar.';
+
+  window.downloadPdf = function () {
+    if (typeof html2pdf === 'undefined') { window.print(); return; }
+    document.body.classList.add('pdfmode');
+    var name = ((D.client ? String(D.client).replace(/[^a-z0-9]/gi, '_') + '_' : '')) + 'Rivertown_vs_' +
+               String(THEM.name || 'Competitor').replace(/[^a-z0-9]/gi, '_') + '.pdf';
+    var opt = {
+      margin: [0.5, 0.5, 0.6, 0.5], filename: name, image: {type: 'png'},
+      html2canvas: {scale: 3, backgroundColor: '#ffffff', useCORS: true},
+      jsPDF: {unit: 'in', format: 'letter', orientation: 'portrait'},
+      pagebreak: {mode: ['css', 'legacy'], avoid: ['.sec', '.verdict', '.card', '.claim', '.cta', '.score', '.r']}
+    };
+    html2pdf().set(opt).from(document.querySelector('.wrap')).save()
+      .then(function () { document.body.classList.remove('pdfmode'); })
+      .catch(function (e) { document.body.classList.remove('pdfmode'); console.error('pdf', e); });
+  };
+})();
+</script>
+</body>
+</html>

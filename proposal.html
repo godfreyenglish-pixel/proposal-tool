@@ -463,5 +463,120 @@
   }
   show(0);
 </script>
+<style>/* PREMIUM SKIN — matches the simulator at myarbitragetool.com
+   Everything is wrapped in @media screen AND scoped to body:not(.pdfmode), so
+   the light PDF theme and the @media print rules above are untouched. Those two
+   paths are what the client saves and forwards; they must not change. */
+@media screen{
+  body:not(.pdfmode){
+    background:
+      radial-gradient(120% 60% at 50% -6%, rgba(251,191,36,.10), transparent 62%),
+      radial-gradient(80% 50% at 100% 100%, rgba(59,130,246,.06), transparent 60%),
+      linear-gradient(180deg,#0A101C 0%,#070B13 45%,#05080E 100%);
+    background-attachment:fixed;
+    font-variant-numeric:tabular-nums;
+  }
+
+  /* surfaces */
+  body:not(.pdfmode) .stat,
+  body:not(.pdfmode) .bars,
+  body:not(.pdfmode) .opt,
+  body:not(.pdfmode) .cta,
+  body:not(.pdfmode) .step{
+    background:linear-gradient(168deg,rgba(255,255,255,.052),rgba(255,255,255,.016));
+    border:1px solid rgba(255,255,255,.075);
+    border-radius:18px;
+    box-shadow:0 1px 0 rgba(255,255,255,.05) inset,0 14px 34px -22px rgba(0,0,0,.9);
+  }
+  body:not(.pdfmode) .step{border-radius:13px;padding:11px 9px}
+  body:not(.pdfmode) .step.active{
+    border-color:rgba(251,191,36,.4);
+    background:linear-gradient(160deg,rgba(251,191,36,.13),rgba(255,255,255,.02));
+  }
+  body:not(.pdfmode) .opt.rec{
+    border-color:rgba(251,191,36,.42);
+    box-shadow:0 1px 0 rgba(255,255,255,.06) inset,0 0 0 1px rgba(251,191,36,.22),0 18px 40px -24px rgba(0,0,0,.95);
+  }
+  body:not(.pdfmode) .topbar,
+  body:not(.pdfmode) .foot,
+  body:not(.pdfmode) .wexp,
+  body:not(.pdfmode) .wrow,
+  body:not(.pdfmode) .wclose,
+  body:not(.pdfmode) .opt .line{border-color:rgba(255,255,255,.07)}
+
+  /* labels: sentence case, no shouting. The brand mark keeps its caps. */
+  body:not(.pdfmode) .stat .k,
+  body:not(.pdfmode) .step .n{
+    text-transform:none;letter-spacing:-.004em;font-size:12px;font-weight:500;color:#7C8698;
+  }
+  body:not(.pdfmode) .step .t{font-size:12.5px}
+  body:not(.pdfmode) .stat .foot,
+  body:not(.pdfmode) .opt .size,
+  body:not(.pdfmode) .opt .netk,
+  body:not(.pdfmode) .opt .line .lk,
+  body:not(.pdfmode) .sub2,
+  body:not(.pdfmode) .bar-row .lbl{color:#7C8698}
+
+  /* figures: tabular sans, not monospace */
+  body:not(.pdfmode) .mono,
+  body:not(.pdfmode) .stat .v,
+  body:not(.pdfmode) .opt .net,
+  body:not(.pdfmode) .opt .line .lv,
+  body:not(.pdfmode) .gift .big,
+  body:not(.pdfmode) .bar-row .amt,
+  body:not(.pdfmode) .wrow .wterm{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+    font-variant-numeric:tabular-nums;font-feature-settings:'tnum' 1;
+    letter-spacing:-.025em;
+  }
+  body:not(.pdfmode) .stat .v{font-weight:700}
+  body:not(.pdfmode) .opt .net{font-weight:700;letter-spacing:-.035em}
+
+  /* the number that carries the page */
+  body:not(.pdfmode) .stat .v.gold{
+    background:linear-gradient(168deg,#FFE9A8 4%,#FBBF24 52%,#E09612 100%);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+    filter:drop-shadow(0 4px 20px rgba(251,191,36,.18));
+  }
+  body:not(.pdfmode) .gift{
+    background:linear-gradient(150deg,rgba(16,185,129,.13),rgba(16,185,129,.025));
+    border:1px solid rgba(52,211,153,.24);border-radius:18px;
+  }
+  body:not(.pdfmode) .gift .big{font-weight:750;letter-spacing:-.04em}
+
+  /* bars */
+  body:not(.pdfmode) .bar-track{background:rgba(255,255,255,.07);height:9px;border-radius:5px}
+  body:not(.pdfmode) .bar-fill{border-radius:5px;box-shadow:0 0 12px -2px currentColor}
+
+  /* controls */
+  body:not(.pdfmode) .btn,
+  body:not(.pdfmode) .nav button,
+  body:not(.pdfmode) .printbtn{border-radius:12px;transition:all .18s cubic-bezier(.22,1,.36,1)}
+  body:not(.pdfmode) .btn.primary,
+  body:not(.pdfmode) .nav .next{
+    background:linear-gradient(160deg,#24487A,#17304F);
+    box-shadow:0 1px 0 rgba(255,255,255,.12) inset,0 10px 26px -14px rgba(27,54,93,.95);
+  }
+  body:not(.pdfmode) .btn.primary:hover,
+  body:not(.pdfmode) .nav .next:hover{transform:translateY(-1px)}
+  body:not(.pdfmode) .btn.ghost,
+  body:not(.pdfmode) .nav button,
+  body:not(.pdfmode) .printbtn{
+    background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.09);
+  }
+  body:not(.pdfmode) .ribbon{box-shadow:0 6px 16px -8px rgba(251,191,36,.9)}
+
+  /* entrance, once per panel change */
+  body:not(.pdfmode) .panel.show{animation:pfade .42s cubic-bezier(.22,1,.36,1)}
+  @keyframes pfade{from{opacity:0;transform:translateY(9px)}to{opacity:1;transform:none}}
+
+  @media(max-width:640px){
+    body:not(.pdfmode) .stat,
+    body:not(.pdfmode) .opt,
+    body:not(.pdfmode) .cta,
+    body:not(.pdfmode) .bars{border-radius:16px}
+  }
+}
+</style>
 </body>
 </html>

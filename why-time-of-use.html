@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Why Your Power Costs More by the Hour — Rivertown Solar</title>
+<style>
+  :root{
+    --bg:#0B1220; --bg2:#111827; --surface:#1F2937; --line:rgba(255,255,255,.08);
+    --text:#F9FAFB; --muted:#9CA3AF; --muted2:#6B7280;
+    --amber:#FBBF24; --amber-d:#F59E0B; --teal:#14B8A6; --green:#22C55E; --red:#F97316;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;line-height:1.6;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+  .wrap{max-width:840px;margin:0 auto;padding:0 22px}
+  section{padding:64px 0;border-bottom:1px solid var(--line)}
+  .brand{font-size:15px;font-weight:800;letter-spacing:.3px}
+  .brand span{color:var(--amber)}
+  .eyebrow{color:var(--amber);font-size:12.5px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase}
+  h1{font-size:clamp(30px,6vw,50px);font-weight:800;line-height:1.1;letter-spacing:-.02em;margin:16px 0}
+  h2{font-size:clamp(23px,4.4vw,34px);font-weight:800;line-height:1.15;letter-spacing:-.02em;margin:10px 0 14px}
+  p.lead{color:var(--muted);font-size:clamp(15px,2.3vw,18px);max-width:640px}
+  p.body{color:#CBD5E1;font-size:15.5px;max-width:640px;margin-top:12px}
+  .reveal{opacity:0;transform:translateY(24px);transition:opacity .7s ease,transform .7s ease}
+  .reveal.in{opacity:1;transform:none}
+
+  /* header */
+  header{position:sticky;top:0;z-index:50;background:rgba(11,18,32,.82);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+  header .wrap{display:flex;align-items:center;justify-content:space-between;padding-top:14px;padding-bottom:14px}
+  .pill{font-size:11px;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:5px 11px}
+
+  /* hero */
+  .hero{position:relative;padding:78px 0 70px;overflow:hidden}
+  .sky{position:absolute;inset:0;z-index:0;background:linear-gradient(120deg,#0B1220 0%,#0B1220 40%,#152036 70%,#0B1220 100%);
+       background-size:220% 220%;animation:sky 16s ease-in-out infinite}
+  @keyframes sky{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+  .hero .wrap{position:relative;z-index:1}
+  .tag{display:inline-flex;gap:8px;align-items:center;background:rgba(251,191,36,.1);border:1px solid rgba(251,191,36,.28);color:var(--amber);font-size:12.5px;font-weight:700;padding:7px 13px;border-radius:999px}
+  .dot{width:7px;height:7px;border-radius:50%;background:var(--amber);animation:blink 1.6s ease-in-out infinite}
+  @keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+  .cue{margin-top:40px;color:var(--muted2);font-size:12.5px;letter-spacing:1px}
+  .cue span{display:inline-block;animation:bob 1.8s ease-in-out infinite}
+  @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(5px)}}
+
+  /* hourly price chart */
+  .chart{margin-top:26px;background:var(--bg2);border:1px solid var(--line);border-radius:16px;padding:22px 18px 14px}
+  .bars{display:flex;align-items:flex-end;gap:3px;height:190px}
+  .bar{flex:1;border-radius:4px 4px 0 0;position:relative;transition:height 1s cubic-bezier(.2,.7,.2,1)}
+  .bar.off{background:linear-gradient(180deg,#1f6f66,#14B8A6)}
+  .bar.peak{background:linear-gradient(180deg,#F59E0B,#FBBF24)}
+  .bar.super{background:linear-gradient(180deg,#ea580c,#F97316)}
+  .axis{display:flex;justify-content:space-between;color:var(--muted2);font-size:10.5px;margin-top:8px;padding:0 2px}
+  .legend{display:flex;flex-wrap:wrap;gap:16px;margin-top:16px;font-size:12.5px;color:var(--muted)}
+  .legend b{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+  .peakspan{margin-top:14px;background:rgba(249,115,22,.09);border:1px solid rgba(249,115,22,.25);border-radius:10px;padding:11px 14px;color:#FED7AA;font-size:13.5px}
+
+  /* stat row */
+  .stats{display:flex;flex-wrap:wrap;gap:14px;margin-top:24px}
+  .stat{flex:1 1 150px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px}
+  .stat .k{font-size:11.5px;color:var(--muted2);text-transform:uppercase;letter-spacing:.4px}
+  .stat .v{font-size:28px;font-weight:800;margin-top:6px;letter-spacing:-.02em}
+  .v.teal{color:var(--teal)} .v.amber{color:var(--amber)} .v.red{color:var(--red)} .v.green{color:var(--green)}
+  .stat .s{font-size:12px;color:var(--muted);margin-top:4px}
+
+  /* toggle demo */
+  .demo{background:var(--bg2);border:1px solid var(--line);border-radius:16px;padding:22px;margin-top:24px}
+  .seg{display:inline-flex;background:var(--surface);border-radius:10px;padding:4px;gap:4px}
+  .seg button{border:0;background:transparent;color:var(--muted);font-size:13.5px;font-weight:700;padding:9px 15px;border-radius:8px;cursor:pointer;transition:.2s}
+  .seg button.on{background:var(--amber);color:#3a2c00}
+  .meter{margin-top:20px;height:26px;border-radius:8px;background:var(--surface);overflow:hidden;position:relative}
+  .fill{height:100%;width:0;border-radius:8px;transition:width .8s cubic-bezier(.2,.7,.2,1)}
+  .result{margin-top:16px;font-size:15px}
+  .result .big{font-size:32px;font-weight:800;letter-spacing:-.02em}
+
+  /* battery animation */
+  .flow{display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-top:24px;background:var(--bg2);border:1px solid var(--line);border-radius:16px;padding:24px}
+  .batt{width:120px;height:150px;border:3px solid #334155;border-radius:12px;position:relative;flex-shrink:0;background:#0d1526;overflow:hidden}
+  .batt:before{content:"";position:absolute;top:-9px;left:50%;transform:translateX(-50%);width:40px;height:8px;background:#334155;border-radius:3px 3px 0 0}
+  .juice{position:absolute;left:0;right:0;bottom:0;background:linear-gradient(180deg,#14B8A6,#0d8f81);animation:charge 6s ease-in-out infinite}
+  @keyframes charge{0%{height:12%}35%{height:92%}55%{height:92%}92%{height:16%}100%{height:12%}}
+  .phase{flex:1;min-width:200px}
+  .phase .row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--line);font-size:14px;color:#CBD5E1}
+  .chip{font-size:11px;font-weight:800;padding:3px 8px;border-radius:6px}
+  .chip.night{background:rgba(20,184,166,.15);color:var(--teal)}
+  .chip.day{background:rgba(251,191,36,.15);color:var(--amber)}
+
+  /* compare */
+  .cols{display:flex;gap:16px;flex-wrap:wrap;margin-top:24px}
+  .col{flex:1 1 260px;background:var(--bg2);border:1px solid var(--line);border-radius:16px;padding:22px}
+  .col h3{font-size:16px;font-weight:800;margin-bottom:4px}
+  .col .tagline{font-size:12.5px;color:var(--muted2);margin-bottom:14px}
+  .col.solar{border-top:3px solid #60A5FA}
+  .col.batt2{border-top:3px solid var(--teal)}
+  .li{display:flex;gap:9px;font-size:13.5px;color:#CBD5E1;padding:7px 0;align-items:flex-start}
+  .li i{color:var(--teal);font-style:normal;font-weight:800}
+  .li.warn i{color:#60A5FA}
+
+  /* increase line */
+  .rise{display:flex;align-items:flex-end;gap:8px;height:120px;margin-top:22px}
+  .rise .yr{flex:1;text-align:center}
+  .rise .col2{background:linear-gradient(180deg,var(--amber),var(--amber-d));border-radius:5px 5px 0 0;transition:height 1s ease}
+  .rise .lab{font-size:11.5px;color:var(--muted);margin-top:6px}
+
+  .foot{background:var(--bg2);text-align:center}
+  .cta{display:inline-block;background:var(--amber);color:#3a2c00;font-weight:800;font-size:15px;text-decoration:none;padding:15px 30px;border-radius:12px;margin-top:8px}
+  .disc{color:var(--muted2);font-size:11.5px;max-width:620px;margin:26px auto 0;line-height:1.6}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <div class="brand">Rivertown <span>Solar</span></div>
+    <div class="pill">Time-of-Use &amp; Battery Arbitrage</div>
+  </div>
+</header>
+
+<!-- HERO -->
+<section class="hero" style="border-bottom:1px solid var(--line)">
+  <div class="sky"></div>
+  <div class="wrap">
+    <div class="tag reveal"><span class="dot"></span> Con Edison &middot; New York</div>
+    <h1 class="reveal">Your power doesn't cost<br>the same all day.</h1>
+    <p class="lead reveal">Con Edison is moving homes onto a time-of-use rate. Handled right, that shift is the single biggest savings opportunity on your bill. Handled wrong, it costs you money. Here's the difference — in about two minutes.</p>
+    <div class="cue reveal">SCROLL <span>&darr;</span></div>
+  </div>
+</section>
+
+<!-- WHY TOU -->
+<section>
+  <div class="wrap">
+    <div class="eyebrow reveal">Step 1 &middot; Why it exists</div>
+    <h2 class="reveal">The grid is cheap at night and expensive by day.</h2>
+    <p class="body reveal">Electricity is made and delivered in real time. Overnight, demand is low and power is cheap. During the day and evening, everyone's running at once — the grid strains, and that power costs far more to deliver. A flat rate hides this by charging you one blended price. Time-of-use pricing simply makes the real cost visible: cheap off-peak, pricey on-peak.</p>
+
+    <div class="chart reveal">
+      <div class="bars" id="bars"></div>
+      <div class="axis"><span>12a</span><span>4a</span><span>8a</span><span>12p</span><span>4p</span><span>8p</span><span>12a</span></div>
+      <div class="legend">
+        <span><b style="background:#14B8A6"></b>Off-peak (overnight)</span>
+        <span><b style="background:#FBBF24"></b>Peak (8am&ndash;midnight)</span>
+        <span><b style="background:#F97316"></b>Summer super-peak (2&ndash;6pm)</span>
+      </div>
+      <div class="peakspan">Notice the shape: Con Edison's peak window runs <strong>8am to midnight — 16 hours a day.</strong> That one detail changes everything below.</div>
+    </div>
+  </div>
+</section>
+
+<!-- WHY CONED PUSHES -->
+<section>
+  <div class="wrap">
+    <div class="eyebrow reveal">Step 2 &middot; Why Con Ed wants you on it</div>
+    <h2 class="reveal">They want to flatten the peak.<br>The 16-hour window is the catch.</h2>
+    <p class="body reveal">Con Ed benefits when customers shift usage off the strained daytime grid — it delays billions in grid upgrades. That's why they're steering homes onto the time-of-use rate (often called Rate III). But because their peak window is a punishing 16 hours long, simply switching your rate usually means paying the <em>higher</em> peak price for most of your day.</p>
+
+    <div class="stats reveal">
+      <div class="stat"><div class="k">Off-peak rate</div><div class="v teal">~5&cent;</div><div class="s">midnight&ndash;8am / kWh</div></div>
+      <div class="stat"><div class="k">Peak rate (summer)</div><div class="v amber">~28&cent;</div><div class="s">8am&ndash;midnight / kWh</div></div>
+      <div class="stat"><div class="k">The spread</div><div class="v red">~5&times;</div><div class="s">peak vs off-peak</div></div>
+    </div>
+    <p class="body reveal" style="margin-top:20px">So switching to time-of-use on its own is a coin flip that usually loses. <strong>The rate switch creates the exposure. Something has to cover the 16-hour peak.</strong> That's where the battery comes in.</p>
+  </div>
+</section>
+
+<!-- THE ARBITRAGE -->
+<section>
+  <div class="wrap">
+    <div class="eyebrow reveal">Step 3 &middot; The strategy</div>
+    <h2 class="reveal">Charge cheap. Run on it all day.</h2>
+    <p class="body reveal">A home battery charges itself overnight while power is cheap, then powers your house through the entire expensive peak window. You buy low and use it during high — every single day. That daily spread, captured automatically, is the engine of the savings.</p>
+
+    <div class="flow reveal">
+      <div class="batt"><div class="juice"></div></div>
+      <div class="phase">
+        <div class="row"><span class="chip night">12a&ndash;8a</span> Battery fills up at the ~5&cent; overnight rate</div>
+        <div class="row"><span class="chip day">8a&ndash;12a</span> Home runs off the battery through the peak</div>
+        <div class="row"><span class="chip day">2p&ndash;6p</span> Covers the summer super-peak — the priciest hours</div>
+        <div class="row" style="border-bottom:0"><span class="chip night">repeat</span> Recharges again overnight. Every day.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- INTERACTIVE: TOU alone vs TOU+battery -->
+<section>
+  <div class="wrap">
+    <div class="eyebrow reveal">See it yourself</div>
+    <h2 class="reveal">Rate switch alone vs. rate switch + battery</h2>
+    <p class="body reveal">Same house, same time-of-use rate. The only difference is whether a battery covers the peak.</p>
+
+    <div class="demo reveal">
+      <div class="seg">
+        <button id="b1" class="on" onclick="setMode(0)">Rate switch alone</button>
+        <button id="b2" onclick="setMode(1)">Rate switch + battery</button>
+      </div>
+      <div class="meter"><div class="fill" id="fill"></div></div>
+      <div class="result">
+        <div class="big" id="resVal">&mdash;</div>
+        <div id="resTxt" style="color:var(--muted);font-size:14px"></div>
+      </div>
+    </div>
+    <p class="body reveal" style="margin-top:16px;font-size:13px;color:var(--muted2)">Illustrative, for the concept. Your real number depends on your usage, battery size, and current rates — that's what your custom model shows.</p>
+  </div>
+</section>
+
+<!-- VS SOLAR -->
+<section>
+  <div class="wrap">
+    <div class="eyebrow reveal">Step 4 &middot; Compared to traditional solar</div>
+    <h2 class="reveal">A different kind of savings — and it stacks.</h2>
+    <p class="body reveal">Rooftop solar is a good product. But in New York it's a long game: a typical system runs <strong>~8&ndash;12 years to pay back</strong>, you still pay delivery charges, and exported power is credited at a lower value than you pay. Battery arbitrage earns from a spread that repeats <em>daily</em>, captures its own incentives, and keeps your lights on in an outage — a benefit solar alone can't give you.</p>
+
+    <div class="cols">
+      <div class="col solar reveal">
+        <h3 style="color:#60A5FA">Traditional Solar</h3>
+        <div class="tagline">Offsets what you generate</div>
+        <div class="li warn"><i>&bull;</i> ~8&ndash;12 year payback in NY</div>
+        <div class="li warn"><i>&bull;</i> Still pay delivery charges on the grid</div>
+        <div class="li warn"><i>&bull;</i> Exports credited below retail</div>
+        <div class="li warn"><i>&bull;</i> No power during an outage (panels alone)</div>
+        <div class="li warn"><i>&bull;</i> Savings depend on sun &amp; weather</div>
+      </div>
+      <div class="col batt2 reveal">
+        <h3 style="color:var(--teal)">Battery Arbitrage</h3>
+        <div class="tagline">Earns from the daily price spread</div>
+        <div class="li"><i>&check;</i> Captures the ~5&times; peak/off-peak spread daily</div>
+        <div class="li"><i>&check;</i> Stacks NYSERDA storage + 30% federal credit</div>
+        <div class="li"><i>&check;</i> Keeps critical loads running in an outage</div>
+        <div class="li"><i>&check;</i> Works rain or shine, 365 nights a year</div>
+        <div class="li"><i>&check;</i> Savings grow as Con Ed rates rise</div>
+      </div>
+    </div>
+    <p class="body reveal" style="margin-top:18px">Best case? You don't have to choose. A battery makes solar you already have (or add later) far more valuable by storing that cheap midday power instead of exporting it for pennies.</p>
+  </div>
+</section>
+
+<!-- FUTURE INCREASES -->
+<section>
+  <div class="wrap">
+    <div class="eyebrow reveal">Step 5 &middot; Why the timing matters</div>
+    <h2 class="reveal">Con Ed's rates are going up. Your spread goes up with them.</h2>
+    <p class="body reveal">In January 2026 New York regulators approved multi-year Con Edison increases — roughly <strong>3% a year through 2028.</strong> As the peak price climbs, the gap between cheap overnight power and expensive daytime power gets <em>wider</em> — and a battery that arbitrages that gap earns more every year. Locking in now means every future rate hike works in your favor instead of against you.</p>
+
+    <div class="rise reveal" id="rise">
+      <div class="yr"><div class="col2" data-h="52%"></div><div class="lab">2025</div></div>
+      <div class="yr"><div class="col2" data-h="66%"></div><div class="lab">2026</div></div>
+      <div class="yr"><div class="col2" data-h="80%"></div><div class="lab">2027</div></div>
+      <div class="yr"><div class="col2" data-h="94%"></div><div class="lab">2028</div></div>
+    </div>
+    <p class="body reveal" style="margin-top:14px;font-size:13px;color:var(--muted2)">Directional illustration of approved delivery-rate increases; exact bill impact varies.</p>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="foot" style="border-bottom:0">
+  <div class="wrap">
+    <div class="eyebrow reveal" style="color:var(--teal)">Your move</div>
+    <h2 class="reveal">See your actual numbers.</h2>
+    <p class="lead reveal" style="margin:0 auto">We'll model your real Con Ed usage and show exactly what the rate switch plus a battery does for your home — before you commit to anything.</p>
+    <div class="reveal" style="margin-top:26px"><a class="cta" href="https://myarbitragetool.com">Model my savings &rarr;</a></div>
+    <div class="disc">
+      Rivertown Solar. Rate figures are illustrative and based on Con Edison's published time-of-use pricing and the January 2026 NY PSC rate order; they exclude certain surcharges and will vary by account and by current tariffs. Incentive amounts are subject to program availability. This explainer is educational and is not a quote.
+    </div>
+  </div>
+</section>
+
+<script>
+  // hourly bars: heights + classes (0-23)
+  (function(){
+    var el=document.getElementById('bars');
+    // relative price shape (off-peak low, peak high, super-peak highest)
+    var h=[18,16,15,15,16,20,30,42, 58,60,62,64, 66,70,86,90, 72,70,66,62, 58,50,40,28];
+    for(var i=0;i<24;i++){
+      var b=document.createElement('div'); b.className='bar';
+      var cls = (i>=8 && i<24) ? 'peak' : 'off';
+      if(i>=14 && i<18) cls='super';
+      b.classList.add(cls);
+      b.style.height='4px'; b.dataset.h=h[i];
+      el.appendChild(b);
+    }
+  })();
+  function growBars(){
+    document.querySelectorAll('#bars .bar').forEach(function(b,i){
+      setTimeout(function(){ b.style.height=b.dataset.h+'%'; }, i*35);
+    });
+  }
+  function growRise(){
+    document.querySelectorAll('#rise .col2').forEach(function(c,i){
+      c.style.height='4px'; setTimeout(function(){ c.style.height=c.dataset.h; }, 120+i*140);
+    });
+  }
+
+  // interactive demo
+  var MODE=0;
+  function setMode(m){
+    MODE=m;
+    document.getElementById('b1').classList.toggle('on',m===0);
+    document.getElementById('b2').classList.toggle('on',m===1);
+    var fill=document.getElementById('fill'), val=document.getElementById('resVal'), txt=document.getElementById('resTxt');
+    if(m===0){
+      fill.style.width='84%'; fill.style.background='linear-gradient(90deg,#ea580c,#F97316)';
+      val.textContent='Paying peak ~16 hrs/day'; val.style.color='#F97316';
+      txt.textContent='On the rate switch alone, most of your usage lands in the expensive window. Typically a wash — or a loss.';
+    } else {
+      fill.style.width='22%'; fill.style.background='linear-gradient(90deg,#0d8f81,#14B8A6)';
+      val.textContent='Running on ~5¢ overnight power'; val.style.color='#14B8A6';
+      txt.textContent='With the battery covering the peak, your home draws from stored cheap power. The spread becomes your savings — every day.';
+    }
+  }
+
+  // reveal on scroll
+  var io=new IntersectionObserver(function(es){
+    es.forEach(function(e){
+      if(e.isIntersecting){
+        e.target.classList.add('in');
+        if(e.target.id==='bars'||e.target.querySelector&&e.target.querySelector('#bars')) {}
+        io.unobserve(e.target);
+      }
+    });
+  },{threshold:.15});
+  document.querySelectorAll('.reveal').forEach(function(x){io.observe(x)});
+
+  // trigger chart + rise animations when in view
+  function watch(id,fn){
+    var t=document.getElementById(id); if(!t) return;
+    var o=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){fn();o.disconnect();}})},{threshold:.3});
+    o.observe(t);
+  }
+  watch('bars',growBars);
+  watch('rise',growRise);
+  setMode(0);
+</script>
+</body>
+</html>

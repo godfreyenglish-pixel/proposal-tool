@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Request Your Site Survey | Rivertown Solar</title>
+<style>
+  :root{
+    --bg:#f4f1ea;--ink:#1a1a1a;--muted:#6b6659;--line:#e2ddd0;
+    --gold:#c8912b;--dark:#141414;
+    --serif:Georgia,'Times New Roman',serif;
+    --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{background:var(--bg);color:var(--ink);font-family:var(--sans);line-height:1.6;-webkit-font-smoothing:antialiased;}
+  header.top{background:var(--dark);color:#fff;}
+  .top-in{max-width:1100px;margin:0 auto;padding:18px 24px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;}
+  .brand{font-family:var(--serif);font-size:22px;}
+  .brand em{color:var(--gold);font-style:italic;}
+  .badge{border:1px solid rgba(255,255,255,.35);border-radius:999px;padding:7px 16px;font-size:11px;letter-spacing:2px;color:#e8e2d4;text-transform:uppercase;white-space:nowrap;}
+  main{max-width:640px;margin:0 auto;padding:56px 24px 48px;}
+  .eyebrow{color:var(--gold);font-size:12px;letter-spacing:2.5px;text-transform:uppercase;font-weight:700;}
+  h1{font-family:var(--serif);font-size:36px;line-height:1.15;margin:12px 0 14px;font-weight:600;}
+  .lead{font-size:18px;color:#33302a;margin:0 0 34px;}
+  .q{border-top:1px solid var(--line);padding-top:26px;margin-top:26px;}
+  .q:first-of-type{border-top:none;padding-top:0;margin-top:0;}
+  .qlabel{font-family:var(--serif);font-size:20px;font-weight:600;margin-bottom:14px;}
+  .opt{display:flex;align-items:center;gap:12px;padding:13px 16px;border:1px solid var(--line);border-radius:11px;margin-bottom:10px;cursor:pointer;background:#fbf9f4;transition:border-color .15s,background .15s;font-size:16px;}
+  .opt:hover{border-color:var(--gold);}
+  .opt input{accent-color:var(--gold);width:18px;height:18px;flex:0 0 auto;}
+  input[type=text],input[type=email],input[type=tel]{width:100%;padding:14px 16px;border:1px solid var(--line);border-radius:11px;font-size:16px;font-family:var(--sans);background:#fff;color:var(--ink);}
+  input:focus{outline:none;border-color:var(--gold);}
+  .hint{color:var(--muted);font-size:14px;margin:6px 0 0;}
+  .btn{display:inline-block;width:100%;margin-top:34px;background:var(--dark);color:#fff;border:none;border-radius:12px;padding:17px 24px;font-size:17px;font-weight:700;font-family:var(--sans);cursor:pointer;letter-spacing:.3px;}
+  .btn:hover{background:#000;}
+  .btn:disabled{opacity:.6;cursor:default;}
+  footer.foot{max-width:640px;margin:48px auto 0;padding:24px 24px 60px;border-top:1px solid var(--line);}
+  .foot .brand{font-family:var(--serif);font-size:18px;color:var(--ink);}
+  .foot p{color:var(--muted);font-size:13.5px;margin:8px 0 0;}
+  #thanks{display:none;text-align:center;padding:40px 10px;}
+  #thanks h2{font-family:var(--serif);font-size:30px;margin:14px 0 8px;}
+  #thanks p{font-size:17px;color:#33302a;}
+  @media(max-width:560px){h1{font-size:29px;}main{padding:40px 20px 30px;}}
+</style>
+</head>
+<body>
+<header class="top"><div class="top-in">
+  <div class="brand">Rivertown <em>Solar</em></div>
+  <div class="badge">Request Your Site Survey</div>
+</div></header>
+
+<main>
+  <div id="form">
+    <div class="eyebrow">One Last Step</div>
+    <h1>Lock in your numbers.</h1>
+    <p class="lead">Three quick questions and we will get your site survey on the calendar. This is the visit that makes your proposal final.</p>
+
+    <div class="q">
+      <div class="qlabel">Your name</div>
+      <input type="text" id="name" placeholder="First and last name">
+    </div>
+
+    <div class="q">
+      <div class="qlabel">1. Did everything we covered today make sense?</div>
+      <label class="opt"><input type="radio" name="understood" value="Yes, all of it"> Yes, all of it</label>
+      <label class="opt"><input type="radio" name="understood" value="Mostly, a couple things to revisit"> Mostly, a couple things to revisit</label>
+      <label class="opt"><input type="radio" name="understood" value="I still have questions"> I still have questions</label>
+    </div>
+
+    <div class="q">
+      <div class="qlabel">2. Best email for your pre-agreement proposal?</div>
+      <input type="email" id="email" placeholder="you@email.com">
+      <p class="hint">This is where we will send your proposal to review and sign.</p>
+    </div>
+
+    <div class="q">
+      <div class="qlabel">3. What is the best day and time for us to come do your site survey?</div>
+      <input type="text" id="timing" placeholder="e.g. Weekday mornings, or Saturday around 10am">
+      <p class="hint">Give us a window that works and we will lock in the exact time with you before we head out.</p>
+    </div>
+
+    <button class="btn" id="send">Send to Rivertown</button>
+  </div>
+
+  <div id="thanks">
+    <div class="eyebrow">Got It</div>
+    <h2>Thanks, we have everything we need.</h2>
+    <p>Godfrey will reach out to lock in your site survey. Talk soon.</p>
+  </div>
+</main>
+
+<footer class="foot">
+  <div class="brand">Rivertown <em>Solar</em></div>
+  <p>Your site survey confirms the final system, pricing, and savings. No payment, no obligation.</p>
+</footer>
+
+<script>
+  var EXEC = "https://script.google.com/macros/s/AKfycbzcOfX9J652V2UNPASbDRFaexPnLe_XHQwpkBwGww5Ds4R4UlFPY114ZJrjSIs-99FCFw/exec";
+  function picked(n){ var el=document.querySelector('input[name='+n+']:checked'); return el?el.value:''; }
+  document.getElementById('send').addEventListener('click', function(){
+    var btn=this;
+    var data={
+      name: document.getElementById('name').value.trim(),
+      understood: picked('understood'),
+      email: document.getElementById('email').value.trim(),
+      timing: document.getElementById('timing').value.trim()
+    };
+    if(!data.name || !data.understood || !data.email || !data.timing){
+      alert('Please answer all three questions and add your name and email.');
+      return;
+    }
+    btn.disabled=true; btn.textContent='Sending...';
+    var q = 'action=lastTouchSurvey'
+      + '&name='+encodeURIComponent(data.name)
+      + '&understood='+encodeURIComponent(data.understood)
+      + '&email='+encodeURIComponent(data.email)
+      + '&timing='+encodeURIComponent(data.timing)
+      + '&t='+Date.now();
+    fetch(EXEC+'?'+q, {method:'GET', mode:'no-cors'}).catch(function(){}).finally(function(){
+      document.getElementById('form').style.display='none';
+      document.getElementById('thanks').style.display='block';
+      window.scrollTo(0,0);
+    });
+  });
+</script>
+</body>
+</html>

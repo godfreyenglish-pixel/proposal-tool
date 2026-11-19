@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta name="robots" content="noindex, nofollow">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tony's Home Energy Guide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Nunito:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --sky:#EEF4FB; --card:#FFFFFF; --ink:#1C2B4A; --muted:#5B6782; --line:#D9E2EE;
+  --sun:#F5B731; --grid:#EE8B2B; --send:#3D9BD6; --bank:#25A26B; --warn:#C8452F; --night:#3D5A9E;
+  --display:'Baloo 2','Trebuchet MS',system-ui,sans-serif; --body:'Nunito',system-ui,-apple-system,'Segoe UI',sans-serif;
+  color-scheme: light;
+}
+*{box-sizing:border-box} html,body{margin:0}
+body{background:var(--sky);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.55}
+h1,h2,h3{font-family:var(--display);line-height:1.1;text-wrap:balance;margin:0}
+h1{font-size:clamp(32px,6vw,52px);font-weight:800} h2{font-size:clamp(25px,4vw,34px);font-weight:800} h3{font-size:20px;font-weight:700}
+p{margin:0;max-width:65ch}
+.wrap{max-width:900px;margin:0 auto;padding:0 18px}
+.num{font-variant-numeric:tabular-nums}
+nav.chips{position:sticky;top:0;z-index:5;background:rgba(238,244,251,.94);backdrop-filter:blur(6px);border-bottom:2px solid var(--line)}
+nav.chips .wrap{display:flex;gap:8px;overflow-x:auto;padding-top:10px;padding-bottom:10px}
+nav.chips a{flex:0 0 auto;font-family:var(--display);font-weight:700;font-size:14px;color:var(--ink);text-decoration:none;background:var(--card);border:2px solid var(--ink);border-radius:999px;padding:4px 12px}
+nav.chips a:hover,nav.chips a:focus-visible{background:var(--ink);color:#fff;outline:none}
+header.hero{padding:34px 0 20px}
+.hero-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:22px;align-items:center}
+.eyebrow{font-family:var(--display);font-weight:700;color:var(--grid);letter-spacing:.06em;text-transform:uppercase;font-size:14px}
+.lede{font-size:18px;color:var(--muted);margin-top:10px}
+.big{display:flex;gap:12px;flex-wrap:wrap;margin-top:16px}
+.stat{background:var(--card);border:3px solid var(--ink);border-radius:18px;padding:10px 14px;box-shadow:4px 4px 0 var(--ink)}
+.stat b{display:block;font-family:var(--display);font-size:28px;line-height:1}
+.stat span{font-size:13px;color:var(--muted)}
+section.ch{padding:30px 0}
+.chhead{display:flex;gap:14px;align-items:flex-start;margin-bottom:14px}
+.badge{flex:0 0 auto;width:46px;height:46px;border-radius:50%;background:var(--ink);color:#fff;font-family:var(--display);font-weight:800;font-size:24px;display:grid;place-items:center;transform:rotate(-6deg)}
+.panel{background:var(--card);border:3px solid var(--ink);border-radius:22px;padding:18px;box-shadow:6px 6px 0 var(--ink)}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.seg{display:inline-flex;border:3px solid var(--ink);border-radius:999px;overflow:hidden;background:var(--card)}
+.seg button{font-family:var(--display);font-weight:700;font-size:15px;border:0;background:transparent;color:var(--ink);padding:6px 14px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--ink);color:#fff}
+.seg button:focus-visible{outline:3px solid var(--grid);outline-offset:-3px}
+.playbtn{font-family:var(--display);font-weight:800;font-size:15px;border:3px solid var(--ink);border-radius:999px;background:var(--sun);color:var(--ink);padding:6px 16px;cursor:pointer;box-shadow:3px 3px 0 var(--ink)}
+.playbtn:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--ink)}
+input[type=range]{width:100%;accent-color:var(--ink)}
+svg{display:block;max-width:100%;height:auto}
+.scene-wrap{display:grid;grid-template-columns:1.45fr 1fr;gap:16px;margin-top:14px}
+.readout{display:grid;gap:8px;align-content:start}
+.ro{display:flex;justify-content:space-between;gap:10px;border-bottom:2px dashed var(--line);padding:4px 0;font-size:15px}
+.ro b{font-family:var(--display);font-size:18px}
+.bubble{position:relative;background:#FFF8E6;border:3px solid var(--ink);border-radius:18px;padding:10px 14px;font-weight:600}
+.bubble:after{content:"";position:absolute;left:28px;bottom:-14px;border:12px solid transparent;border-top-color:var(--ink);border-bottom:0}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:13px;color:var(--muted);margin-top:8px}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:5px;vertical-align:-1px;border:1.5px solid var(--ink)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th{font-family:var(--display);text-align:left;border-bottom:3px solid var(--ink);padding:6px}
+td{padding:6px;border-bottom:1.5px solid var(--line)} td.r,th.r{text-align:right}
+.note{font-size:13px;color:var(--muted)}
+.tip{background:var(--ink);color:#fff;border-radius:18px;padding:14px 16px} .tip b{color:#FFD58A}
+.alert{background:#FDECEA;border:3px solid var(--warn);border-radius:18px;padding:12px 16px}
+.case{background:var(--card);border:3px solid var(--ink);border-radius:18px;padding:14px;box-shadow:4px 4px 0 var(--ink);cursor:pointer;text-align:left;font:inherit;color:inherit}
+.case[aria-expanded="true"]{background:#FFF8E6}
+.case .more{display:none;margin-top:8px} .case[aria-expanded="true"] .more{display:block}
+.check{display:flex;gap:10px;align-items:flex-start;padding:8px 0;border-bottom:2px dashed var(--line)}
+.check input{width:22px;height:22px;accent-color:var(--bank);flex:0 0 auto;margin-top:2px}
+.calcv{font-family:var(--display);font-weight:800;font-size:34px}
+footer{padding:30px 0 50px;color:var(--muted);font-size:13px}
+@media (max-width:720px){.hero-grid,.scene-wrap,.two{grid-template-columns:1fr}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+.flow{stroke-dasharray:4 10;animation:flow 1s linear infinite} @keyframes flow{to{stroke-dashoffset:-14}}
+</style>
+</head>
+<body>
+<nav class="chips" aria-label="Chapters"><div class="wrap">
+<a href="#start">Start</a><a href="#meter">1 · How your meter counts</a><a href="#story">2 · Four years of bills</a><a href="#seasons">3 · Season vs season</a><a href="#clues">4 · Two possible causes</a><a href="#cost">5 · What a kWh costs</a><a href="#next">6 · What's next</a>
+</div></nav>
+
+<header class="hero" id="start"><div class="wrap hero-grid">
+<div>
+<div class="eyebrow">Tony Genao · 11 John Alexander Dr</div>
+<h1>Your home's energy story, explained.</h1>
+<p class="lede">Built from every bill since June 2022 (52 bills from Con Ed's net-metering summary). Slide, tap and play to see how your panels, your house and your meter have changed.</p>
+<div class="big">
+<div class="stat"><b class="num" id="hNow"></b><span>bought from Con Ed, last 12 months</span></div>
+<div class="stat"><b class="num" id="hThen"></b><span>the same 12 months ending Oct 2023</span></div>
+<div class="stat"><b class="num" id="hX"></b><span>more than back then</span></div>
+</div>
+</div>
+<div id="heroArt" aria-hidden="true"></div>
+</div></header>
+
+<main class="wrap">
+
+<section class="ch" id="meter">
+<div class="chhead"><div class="badge">1</div><div><h2>How your meter counts</h2><p class="note">Your panels feed the house first. Con Ed's meter only sees what's left over: power you buy when the panels fall short, and power you send back when they make extra. Sent-back power goes into a credit bank you draw from later.</p></div></div>
+<div class="panel">
+<div class="row"><button class="playbtn" id="mPlay">▶ Play four years</button><span class="note">or slide through every bill</span></div>
+<div class="scene-wrap">
+<div><div id="scene"></div>
+<label for="mSlide" class="note">Bill: <b id="mLbl" class="num"></b></label>
+<input type="range" id="mSlide" min="0" step="1" value="0">
+</div>
+<div class="readout" id="mRead"></div>
+</div>
+<div class="bubble" id="sunSays" style="margin-top:14px"></div>
+</div>
+</section>
+
+<section class="ch" id="story">
+<div class="chhead"><div class="badge">2</div><div><h2>Four years of bills</h2><p class="note">Each bar is one bill. Up means you bought power from Con Ed. Down means your panels made extra and banked it. Tap any bar.</p></div></div>
+<div class="panel">
+<div id="storySvg"></div>
+<div class="legend"><span><i style="background:var(--grid)"></i>Bought from Con Ed</span><span><i style="background:var(--send)"></i>Sent back, banked</span><span><i style="background:var(--warn)"></i>The stretch that doesn't fit</span></div>
+<p class="note" id="storyPick" style="margin-top:10px">Tap a bar to see that bill.</p>
+<div id="yearsSvg" style="margin-top:18px"></div>
+</div>
+</section>
+
+<section class="ch" id="seasons">
+<div class="chhead"><div class="badge">3</div><div><h2>Season vs season</h2><p class="note">The fairest test: the same three months, year after year. Below zero means the panels covered the house and banked extra.</p></div></div>
+<div class="panel">
+<div class="seg" role="group" aria-label="Season"><button data-s="spring" aria-pressed="true">🌱 Spring</button><button data-s="summer" aria-pressed="false">☀ Summer</button><button data-s="winter" aria-pressed="false">❄ Winter</button></div>
+<div id="seasonSvg" style="margin-top:12px"></div>
+<div class="tip" id="seasonTip" style="margin-top:10px"></div>
+</div>
+</section>
+
+<section class="ch" id="clues">
+<div class="chhead"><div class="badge">4</div><div><h2>Two possible causes</h2><p class="note">Buying more from the grid can mean the panels make less, or the house uses more. The meter can't tell them apart. Tap each card.</p></div></div>
+<div class="two">
+<button class="case" aria-expanded="false"><h3>🔧 Panels making less</h3><p style="margin-top:6px">Some of your panels or microinverters stopped producing, or did for a while.</p>
+<div class="more"><p><b>What fits:</b> spring 2025. You bought 3,241 kWh when every other spring you sent power back. The Enphase app will show whether those months were low.</p><p style="margin-top:6px"><b>Usual fix:</b> a service call, often under warranty. The cheapest kWh you'll ever get back.</p></div></button>
+<button class="case" aria-expanded="false"><h3>🏠 House using more</h3><p style="margin-top:6px">New loads since the panels went in.</p>
+<div class="more"><p><b>What fits:</b> summer and winter both grew year after year, while spring 2026 was your best ever. That pattern is a house using more, not panels failing.</p><p style="margin-top:6px"><b>Usual fix:</b> more panels may be right, sized to the real load, not to last year's bills.</p></div></button>
+</div>
+<div class="panel" style="margin-top:16px">
+<h3>For scale</h3>
+<p style="margin-top:6px">A healthy 10 kW system around here typically makes roughly <b>10,000 to 12,000 kWh a year</b> (estimate, depends on roof direction and shade). Your Enphase app shows exactly what yours made each month. If it's in that range, the panels are fine and the house grew. If it's well under, we fix that first.</p>
+</div>
+</section>
+
+<section class="ch" id="cost">
+<div class="chhead"><div class="badge">5</div><div><h2>What a kWh costs you</h2><p class="note">Straight from your latest bill. Slide to see what changing your yearly grid purchases does to the bill.</p></div></div>
+<div class="panel">
+<div class="two">
+<div><table id="costTbl"></table><p class="note" style="margin-top:8px">Fixed charges are the $21.20 basic charge plus Con Ed's $13.63 solar charge ($1.363 per kW of solar, billed on your 10 kW), with tax. That solar charge is tied to system size, so an expansion raises it. Before your EAP credit.</p></div>
+<div>
+<label for="cSlide" class="note">Yearly kWh bought from Con Ed</label>
+<input type="range" id="cSlide" min="0" step="100">
+<div class="calcv num" id="cKwh"></div>
+<p class="note">a year at today's rates, about</p>
+<div class="calcv num" id="cCost" style="color:var(--grid)"></div>
+<p class="note" id="cDiff"></p>
+</div>
+</div>
+<div class="tip" style="margin-top:16px"><b>Market context, not a quote.</b> Grid power runs about 35¢ a kWh and rises every year (Con Ed's approved plan adds roughly 3 to 4% a year through 2028). A system done right locks in a far lower cost per kWh, fixed for 25 years. The number to compare between any two quotes is cost per kWh over the system's life, plus what the warranty actually covers, labor included.</div>
+</div>
+</section>
+
+<section class="ch" id="next">
+<div class="chhead"><div class="badge">6</div><div><h2>What's next</h2><p class="note">Tick them off as you go. Three things from you settle the question, then we build the numbers together.</p></div></div>
+<div class="panel">
+<div id="checks"></div>
+<div class="tip" style="margin-top:16px"><b>What's deliberately not in here:</b> no price, no system size, no payback. Those get built with you on a 30 to 45 minute plan review call, once we know whether the panels need a fix, the house needs more, or both. If you move forward, the site visit and everything after it is handled by our permitting team once the agreement is signed.</div>
+</div>
+</section>
+
+</main>
+<footer><div class="wrap">
+<p><b>How this was built.</b> Net kWh per bill from the net-metering summary on your Sep 28 to Oct 27, 2026 bill (52 bills, Jun 2022 to Oct 2026). Net means what the house used minus what the panels made; the meter can't see either one alone. Seasons use each bill's midpoint. System size from the 10.00 kW solar charge on the bill. Production range assumes about 1,000 to 1,200 kWh per kW a year (estimate). Costs from your latest bill and exclude your EAP credit. Estimates only.</p>
+<p style="margin-top:10px">Godfrey English · Energy Consultant, Rivertown Solar · (347) 395-7807 · 32 Main St, Dobbs Ferry NY 10522</p>
+</div></footer>
+
+<script>
+const D = {"periods": [{"start": "2022-06-29", "end": "2022-07-29", "days": 30, "net": -314, "bank": -700, "billed": 0, "mid": "2022-07-14"}, {"start": "2022-07-29", "end": "2022-08-29", "days": 31, "net": -84, "bank": -784, "billed": 0, "mid": "2022-08-13"}, {"start": "2022-08-29", "end": "2022-09-28", "days": 30, "net": -290, "bank": -1074, "billed": 0, "mid": "2022-09-13"}, {"start": "2022-09-28", "end": "2022-10-28", "days": 30, "net": -156, "bank": -1230, "billed": 0, "mid": "2022-10-13"}, {"start": "2022-10-28", "end": "2022-11-30", "days": 33, "net": 199, "bank": -1031, "billed": 0, "mid": "2022-11-13"}, {"start": "2022-11-30", "end": "2022-12-30", "days": 30, "net": 1084, "bank": 0, "billed": 53, "mid": "2022-12-15"}, {"start": "2022-12-30", "end": "2023-01-31", "days": 32, "net": 884, "bank": 0, "billed": 884, "mid": "2023-01-15"}, {"start": "2023-01-31", "end": "2023-03-02", "days": 30, "net": 354, "bank": 0, "billed": 354, "mid": "2023-02-15"}, {"start": "2023-03-02", "end": "2023-03-31", "days": 29, "net": 3, "bank": 0, "billed": 3, "mid": "2023-03-16"}, {"start": "2023-03-31", "end": "2023-05-01", "days": 31, "net": -350, "bank": -350, "billed": 0, "mid": "2023-04-15"}, {"start": "2023-05-01", "end": "2023-05-30", "days": 29, "net": -322, "bank": -672, "billed": 0, "mid": "2023-05-15"}, {"start": "2023-05-30", "end": "2023-06-28", "days": 29, "net": -295, "bank": -967, "billed": 0, "mid": "2023-06-13"}, {"start": "2023-06-28", "end": "2023-07-28", "days": 30, "net": 380, "bank": -587, "billed": 0, "mid": "2023-07-13"}, {"start": "2023-07-28", "end": "2023-08-28", "days": 31, "net": 528, "bank": -59, "billed": 0, "mid": "2023-08-12"}, {"start": "2023-08-28", "end": "2023-09-27", "days": 30, "net": 390, "bank": 0, "billed": 331, "mid": "2023-09-12"}, {"start": "2023-09-27", "end": "2023-10-26", "days": 29, "net": 293, "bank": 0, "billed": 293, "mid": "2023-10-11"}, {"start": "2023-10-26", "end": "2023-11-28", "days": 33, "net": 511, "bank": 0, "billed": 511, "mid": "2023-11-11"}, {"start": "2023-11-28", "end": "2023-12-28", "days": 30, "net": 903, "bank": 0, "billed": 903, "mid": "2023-12-13"}, {"start": "2023-12-28", "end": "2024-01-29", "days": 32, "net": 1236, "bank": 0, "billed": 1236, "mid": "2024-01-13"}, {"start": "2024-01-29", "end": "2024-02-28", "days": 30, "net": 2181, "bank": 0, "billed": 2181, "mid": "2024-02-13"}, {"start": "2024-02-28", "end": "2024-03-28", "days": 29, "net": -196, "bank": -196, "billed": 0, "mid": "2024-03-13"}, {"start": "2024-03-28", "end": "2024-04-26", "days": 29, "net": -75, "bank": -271, "billed": 0, "mid": "2024-04-11"}, {"start": "2024-04-26", "end": "2024-05-28", "days": 32, "net": -82, "bank": -353, "billed": 0, "mid": "2024-05-12"}, {"start": "2024-05-28", "end": "2024-06-26", "days": 29, "net": 346, "bank": -7, "billed": 0, "mid": "2024-06-11"}, {"start": "2024-06-26", "end": "2024-07-26", "days": 30, "net": 632, "bank": 0, "billed": 625, "mid": "2024-07-11"}, {"start": "2024-07-26", "end": "2024-08-26", "days": 31, "net": 276, "bank": 0, "billed": 276, "mid": "2024-08-10"}, {"start": "2024-08-26", "end": "2024-09-25", "days": 30, "net": -90, "bank": -90, "billed": 0, "mid": "2024-09-10"}, {"start": "2024-09-25", "end": "2024-10-24", "days": 29, "net": -201, "bank": -291, "billed": 0, "mid": "2024-10-09"}, {"start": "2024-10-24", "end": "2024-11-25", "days": 32, "net": 160, "bank": -131, "billed": 0, "mid": "2024-11-09"}, {"start": "2024-11-25", "end": "2024-12-27", "days": 32, "net": 1556, "bank": 0, "billed": 1425, "mid": "2024-12-11"}, {"start": "2024-12-27", "end": "2025-01-29", "days": 33, "net": 3084, "bank": 0, "billed": 3084, "mid": "2025-01-12"}, {"start": "2025-01-29", "end": "2025-02-28", "days": 30, "net": 1279, "bank": 0, "billed": 1279, "mid": "2025-02-13"}, {"start": "2025-02-28", "end": "2025-03-31", "days": 31, "net": 922, "bank": 0, "billed": 922, "mid": "2025-03-15"}, {"start": "2025-03-31", "end": "2025-04-29", "days": 29, "net": 1114, "bank": 0, "billed": 1114, "mid": "2025-04-14"}, {"start": "2025-04-29", "end": "2025-05-29", "days": 30, "net": 1205, "bank": 0, "billed": 1205, "mid": "2025-05-14"}, {"start": "2025-05-29", "end": "2025-06-27", "days": 29, "net": 1926, "bank": 0, "billed": 1926, "mid": "2025-06-12"}, {"start": "2025-06-27", "end": "2025-07-29", "days": 32, "net": 1137, "bank": 0, "billed": 1137, "mid": "2025-07-13"}, {"start": "2025-07-29", "end": "2025-08-27", "days": 29, "net": 667, "bank": 0, "billed": 667, "mid": "2025-08-12"}, {"start": "2025-08-27", "end": "2025-09-26", "days": 30, "net": 1568, "bank": 0, "billed": 1568, "mid": "2025-09-11"}, {"start": "2025-09-26", "end": "2025-10-28", "days": 32, "net": 99, "bank": 0, "billed": 99, "mid": "2025-10-12"}, {"start": "2025-10-28", "end": "2025-11-26", "days": 29, "net": 676, "bank": 0, "billed": 676, "mid": "2025-11-11"}, {"start": "2025-11-26", "end": "2025-12-29", "days": 33, "net": 2586, "bank": 0, "billed": 2586, "mid": "2025-12-12"}, {"start": "2025-12-29", "end": "2026-01-29", "days": 31, "net": 2094, "bank": 0, "billed": 2094, "mid": "2026-01-13"}, {"start": "2026-01-29", "end": "2026-03-02", "days": 32, "net": 1183, "bank": 0, "billed": 1183, "mid": "2026-02-14"}, {"start": "2026-03-02", "end": "2026-03-31", "days": 29, "net": -96, "bank": -96, "billed": 0, "mid": "2026-03-16"}, {"start": "2026-03-31", "end": "2026-04-29", "days": 29, "net": -329, "bank": -425, "billed": 0, "mid": "2026-04-14"}, {"start": "2026-04-29", "end": "2026-05-29", "days": 30, "net": -367, "bank": -792, "billed": 0, "mid": "2026-05-14"}, {"start": "2026-05-29", "end": "2026-06-29", "days": 31, "net": -32, "bank": -824, "billed": 0, "mid": "2026-06-13"}, {"start": "2026-06-29", "end": "2026-07-29", "days": 30, "net": 1609, "bank": 0, "billed": 785, "mid": "2026-07-14"}, {"start": "2026-07-29", "end": "2026-08-27", "days": 29, "net": 1867, "bank": 0, "billed": 1867, "mid": "2026-08-12"}, {"start": "2026-08-27", "end": "2026-09-28", "days": 32, "net": 1818, "bank": 0, "billed": 1818, "mid": "2026-09-12"}, {"start": "2026-09-28", "end": "2026-10-27", "days": 29, "net": 800, "bank": 0, "billed": 800, "mid": "2026-10-12"}], "years": [{"net": 3148, "start": "2022-10-28", "end": "2023-10-26"}, {"net": 5441, "start": "2023-10-26", "end": "2024-10-24"}, {"net": 14717, "start": "2024-10-24", "end": "2025-10-28"}, {"net": 11809, "start": "2025-10-28", "end": "2026-10-27"}], "startIndex": 51, "seasons": {"spring": [{"year": 2023, "net": -669, "n": 3}, {"year": 2024, "net": -353, "n": 3}, {"year": 2025, "net": 3241, "n": 3}, {"year": 2026, "net": -792, "n": 3}], "summer": [{"year": 2022, "net": -688, "n": 3}, {"year": 2023, "net": 1298, "n": 3}, {"year": 2024, "net": 818, "n": 3}, {"year": 2025, "net": 3372, "n": 3}, {"year": 2026, "net": 5294, "n": 3}], "winter": [{"year": 2023, "net": 2322, "n": 3}, {"year": 2024, "net": 4320, "n": 3}, {"year": 2025, "net": 5919, "n": 3}, {"year": 2026, "net": 5863, "n": 3}]}, "seasonText": {"spring": "<b>Spring 2025 sticks out.</b> Every other spring your panels covered the house and banked extra. In 2025 you bought 3,241 kWh instead. That's about 3,800 kWh off, close to what a 10 kW system makes in a spring. Spring 2026 was back to normal, so the panels work today.", "summer": "<b>Summer is where the house grew most.</b> In 2022 the panels covered summer and sent back 688 kWh. In 2026 you bought 5,294 kWh over the same three months, with the sun at its strongest.", "winter": "<b>Winters grew too.</b> From 2,322 kWh in 2023 to 5,863 in 2026. Your heat is gas, so the extra electric use is coming from something else in the house."}, "flag": {"year": 2025, "from": "2025-03-01", "to": "2025-06-30"}, "flagYear": 2, "rates": {"supply": 0.1292, "delivery": 0.2044, "marginal": 0.3337, "fixed": 37.07}, "checks": [["Enphase production by month.", "In the Enphase app, open production, switch to Month, and screenshot each year since install."], ["Green Button data.", "coned.com, My Account, Energy Usage, Download my data, 24 months, CSV."], ["Five quick answers.", "What heats and cools the house, panel size, anything big added or coming, whether outage backup matters, roof age."], ["Who installed the system, and was it off in early 2025?", "That decides whether a fix is covered."], ["Book the plan review.", "30 to 45 minutes, screen share is fine. We build the numbers together."]]};
+const $ = id => document.getElementById(id);
+const C = {ink:'#1C2B4A', muted:'#5B6782', line:'#D9E2EE', sun:'#F5B731', grid:'#EE8B2B', send:'#3D9BD6', bank:'#25A26B', warn:'#C8452F', night:'#3D5A9E'};
+const kwh = x => Math.round(x).toLocaleString()+' kWh';
+const money = x => '$'+Math.round(x).toLocaleString();
+const P = D.periods, N = P.length;
+const fmt = s => { const d=new Date(s+'T12:00:00'); return d.toLocaleString('en-US',{month:'short',year:'numeric'}); };
+const isFlag = p => D.flag && p.mid>=D.flag.from && p.mid<=D.flag.to;
+
+// ---------- hero
+const yrs=D.years; $('hNow').textContent=kwh(yrs[yrs.length-1].net); $('hThen').textContent=kwh(yrs[0].net);
+$('hX').textContent=(yrs[yrs.length-1].net/yrs[0].net).toFixed(1)+'x';
+function sunFace(cx,cy,r,mood){
+  const ray=Array.from({length:10},(_,i)=>{const a=i*Math.PI/5; return `<line x1="${cx+Math.cos(a)*(r+6)}" y1="${cy+Math.sin(a)*(r+6)}" x2="${cx+Math.cos(a)*(r+16)}" y2="${cy+Math.sin(a)*(r+16)}" stroke="${C.ink}" stroke-width="4" stroke-linecap="round"/>`}).join('');
+  const mouth = mood==='sad' ? `<path d="M${cx-r*.35},${cy+r*.45} q${r*.35},-${r*.25} ${r*.7},0" stroke="${C.ink}" stroke-width="3" fill="none" stroke-linecap="round"/>`
+    : mood==='sleep' ? `<circle cx="${cx}" cy="${cy+r*.4}" r="4" fill="${C.ink}"/>`
+    : `<path d="M${cx-r*.4},${cy+r*.25} q${r*.4},${r*.4} ${r*.8},0" stroke="${C.ink}" stroke-width="3" fill="#fff" stroke-linecap="round"/>`;
+  const eyes = mood==='sleep' ? `<path d="M${cx-r*.45},${cy-r*.15} h${r*.3} M${cx+r*.15},${cy-r*.15} h${r*.3}" stroke="${C.ink}" stroke-width="3" stroke-linecap="round"/>`
+    : `<circle cx="${cx-r*.3}" cy="${cy-r*.15}" r="4" fill="${C.ink}"/><circle cx="${cx+r*.3}" cy="${cy-r*.15}" r="4" fill="${C.ink}"/>`;
+  return `<g>${ray}<circle cx="${cx}" cy="${cy}" r="${r}" fill="${C.sun}" stroke="${C.ink}" stroke-width="4"/>${eyes}${mouth}</g>`;
+}
+function house(x,y,panels){
+  let pv=`<g transform="translate(${x+16},${y-14}) rotate(-38.66)">`; for(let r=0;r<2;r++) for(let i=0;i<4;i++) pv+=`<rect x="${4+i*17}" y="${-r*12-12}" width="15" height="10" fill="${panels?'#2B4C8C':'#8A94A8'}" stroke="${C.ink}" stroke-width="1.5"/>`; pv+='</g>';
+  return `<path d="M${x} ${y} L${x+70} ${y-56} L${x+140} ${y} Z" fill="${C.grid}" stroke="${C.ink}" stroke-width="4" stroke-linejoin="round"/>${pv}
+  <rect x="${x+12}" y="${y-2}" width="116" height="78" fill="#fff" stroke="${C.ink}" stroke-width="4"/>
+  <rect x="${x+30}" y="${y+14}" width="26" height="24" fill="#FFE7A8" stroke="${C.ink}" stroke-width="3"/><rect x="${x+84}" y="${y+14}" width="26" height="24" fill="#FFE7A8" stroke="${C.ink}" stroke-width="3"/>
+  <rect x="${x+58}" y="${y+44}" width="24" height="32" fill="${C.night}" stroke="${C.ink}" stroke-width="3"/>`;
+}
+$('heroArt').innerHTML=`<svg viewBox="0 0 320 240" role="img" aria-label="Cartoon house with solar panels and a smiling sun"><rect y="196" width="320" height="44" fill="#BFE3C8"/><path d="M0 196 H320" stroke="${C.ink}" stroke-width="4"/>${sunFace(250,58,26,'happy')}${house(50,120,true)}</svg>`;
+
+// ---------- chapter 1 meter scene
+let mi=0, playT=null; $('mSlide').max=N-1;
+function scene(){
+  const p=P[mi], v=p.net, sending=v<0, m=new Date(p.mid+'T12:00:00').getMonth(), summer=m>=5&&m<=8, winter=m>=11||m<=1;
+  const flag=isFlag(p); const mood= flag?'sad':(winter?'sleep':'happy');
+  const sky= winter?'#C9DCEB':(summer?'#9CD3F5':'#B9E2F7');
+  const bankMax=Math.max(...P.map(x=>-x.bank),1), lvl=Math.min(1,(-p.bank)/bankMax);
+  $('scene').innerHTML=`<svg viewBox="0 0 640 300" role="img" aria-label="House, meter and credit bank for the bill ending ${p.end}">
+  <rect width="640" height="300" fill="${sky}"/>
+  ${sunFace(90,62,30,mood)}
+  <rect y="242" width="640" height="58" fill="${winter?'#E9EEF2':'#9ED39A'}"/><path d="M0 242 H640" stroke="${C.ink}" stroke-width="4"/>
+  ${house(150,166,true)}
+  <rect x="330" y="150" width="62" height="78" rx="10" fill="#fff" stroke="${C.ink}" stroke-width="4"/><circle cx="361" cy="182" r="18" fill="#F3F6FA" stroke="${C.ink}" stroke-width="3"/>
+  <path d="M361 182 L${361+14*Math.cos(sending?-2.4:-0.7)} ${182+14*Math.sin(sending?-2.4:-0.7)}" stroke="${sending?C.send:C.grid}" stroke-width="4" stroke-linecap="round"/>
+  <text x="361" y="220" text-anchor="middle" font-family="Baloo 2" font-weight="800" font-size="12" fill="${C.ink}">METER</text>
+  <rect x="520" y="40" width="12" height="204" fill="#8A6A4A" stroke="${C.ink}" stroke-width="3"/><rect x="496" y="48" width="60" height="9" fill="#8A6A4A" stroke="${C.ink}" stroke-width="3"/>
+  <path d="M392 170 C440 140 470 90 520 60" stroke="${C.ink}" stroke-width="3" fill="none"/>
+  <path d="M${sending?'392 170 C440 140 470 90 520 60':'520 60 C470 90 440 140 392 170'}" stroke="${sending?C.send:C.grid}" stroke-width="7" fill="none" class="flow" stroke-linecap="round"/>
+  <g transform="translate(410,196)"><rect width="84" height="46" rx="12" fill="#fff" stroke="${C.ink}" stroke-width="3"/><rect x="5" y="${41-36*lvl}" width="74" height="${36*lvl}" rx="7" fill="${C.bank}" opacity=".85"/>
+  <text x="42" y="-6" text-anchor="middle" font-family="Baloo 2" font-weight="800" font-size="12" fill="${C.ink}">CREDIT BANK</text></g>
+  <g transform="translate(16,214)"><rect width="128" height="28" rx="10" fill="${sending?C.send:C.grid}" stroke="${C.ink}" stroke-width="3"/>
+  <text x="64" y="19" text-anchor="middle" font-family="Baloo 2" font-weight="800" font-size="14" fill="#fff">${sending?'SENDING BACK':'BUYING'}</text></g>
+  </svg>`;
+  $('mLbl').textContent=fmt(p.start)+' to '+fmt(p.end);
+  $('mRead').innerHTML=`
+   <div class="ro"><span>${sending?'Panels made extra':'Bought from Con Ed'}</span><b class="num" style="color:${sending?C.send:C.grid}">${kwh(Math.abs(v))}</b></div>
+   <div class="ro"><span>Credit bank after this bill</span><b class="num" style="color:${C.bank}">${kwh(Math.max(0,-p.bank))}</b></div>
+   <div class="ro"><span>kWh you paid for</span><b class="num">${kwh(p.billed)}</b></div>
+   <div class="ro"><span>Days in the bill</span><b class="num">${p.days}</b></div>`;
+  let say;
+  if(flag) say=`Something's off here. Spring is when I do my best work, but this bill you bought ${kwh(v)}. Other springs you sent power back. Were the panels off?`;
+  else if(sending) say=`Good month! The panels made more than the house used, so ${kwh(-v)} went back to the grid and into your credit bank.`;
+  else if(p.billed<v) say=`You used ${kwh(v)} more than the panels made, but your credit bank covered ${kwh(v-p.billed)} of it. You only paid for ${kwh(p.billed)}.`;
+  else if(winter) say=`Short winter days. I can't keep up in ${fmt(p.mid).split(' ')[0]}, so you bought ${kwh(v)} from Con Ed.`;
+  else if(summer) say=`Long sunny days and you still bought ${kwh(v)}. Something in the house is working hard this summer.`;
+  else say=`You bought ${kwh(v)} from Con Ed this bill.`;
+  $('sunSays').textContent='☀ '+say;
+}
+$('mSlide').addEventListener('input',e=>{mi=+e.target.value;scene()});
+$('mPlay').onclick=()=>{ if(playT){clearInterval(playT);playT=null;$('mPlay').textContent='▶ Play four years';return;}
+  mi=0; $('mSlide').value=0; scene(); $('mPlay').textContent='❚❚ Pause';
+  playT=setInterval(()=>{ if(mi>=N-1){clearInterval(playT);playT=null;$('mPlay').textContent='▶ Play four years';return;} mi++; $('mSlide').value=mi; scene(); },650); };
+mi=D.startIndex; $('mSlide').value=mi; scene();
+
+// ---------- chapter 2 story
+function story(){
+  const W=860,H=280,L=50,B=34,T=12, mx=Math.ceil(Math.max(...P.map(p=>p.net))/800)*800, mn=Math.floor(Math.min(0,...P.map(p=>p.net))/400)*400, bw=(W-L-6)/N;
+  const Y=v=>T+(H-B-T)*(mx-v)/(mx-mn); let s='';
+  for(let v=mn; v<=mx; v+=(mx-mn>2400?800:400)) s+=`<line x1="${L}" x2="${W}" y1="${Y(v)}" y2="${Y(v)}" stroke="${v===0?C.ink:C.line}" stroke-width="${v===0?2:1.5}"/><text x="${L-6}" y="${Y(v)+4}" text-anchor="end" font-size="11" fill="${C.muted}" font-family="Nunito">${v.toLocaleString()}</text>`;
+  P.forEach((p,i)=>{ const x=L+i*bw+1, y0=Math.min(Y(0),Y(p.net)), h=Math.max(1,Math.abs(Y(p.net)-Y(0))); const col=isFlag(p)?C.warn:(p.net<0?C.send:C.grid);
+    s+=`<rect x="${x}" y="${y0}" width="${bw-2}" height="${h}" fill="${col}" stroke="${C.ink}" stroke-width="1" rx="2"/>`;
+    s+=`<rect class="hit" data-i="${i}" x="${x-1}" y="${T}" width="${bw}" height="${H-B-T}" fill="transparent" style="cursor:pointer" tabindex="0" role="button" aria-label="Bill ending ${p.end}"/>`;
+    const d=new Date(p.mid+'T12:00:00'); if(d.getMonth()===0) s+=`<text x="${x}" y="${H-12}" font-size="12" font-weight="800" fill="${C.ink}" font-family="Nunito">${d.getFullYear()}</text>`; });
+  $('storySvg').innerHTML=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Net kWh on every bill">${s}</svg>`;
+  document.querySelectorAll('.hit').forEach(el=>{ const f=()=>{ const p=P[+el.dataset.i];
+    $('storyPick').innerHTML=`<b>${fmt(p.start)} to ${fmt(p.end)}:</b> ${p.net<0?'panels made '+kwh(-p.net)+' extra, banked':'bought '+kwh(p.net)+' from Con Ed'}${p.billed!==Math.max(p.net,0)?', paid for '+kwh(p.billed)+' after credits':''}. ${isFlag(p)?'This is the stretch that does not fit the other years.':''}`;
+    mi=+el.dataset.i; $('mSlide').value=mi; scene(); };
+    el.addEventListener('click',f); el.addEventListener('keydown',e=>{ if(e.key==='Enter'||e.key===' '){e.preventDefault();f();} }); });
+  // year totals
+  const W2=860,H2=200, mx2=Math.max(...yrs.map(y=>y.net))*1.2, bw2=W2/yrs.length; let t='';
+  yrs.forEach((y,i)=>{ const h=(H2-60)*y.net/mx2, x=i*bw2+30, w=bw2-60; const flag=D.flagYear===i;
+    t+=`<rect x="${x}" y="${H2-40-h}" width="${w}" height="${h}" rx="8" fill="${flag?C.warn:C.grid}" stroke="${C.ink}" stroke-width="3"/>
+    <text x="${x+w/2}" y="${H2-48-h}" text-anchor="middle" font-family="Baloo 2" font-weight="800" font-size="18" fill="${C.ink}">${kwh(y.net)}</text>
+    <text x="${x+w/2}" y="${H2-18}" text-anchor="middle" font-family="Nunito" font-size="12" fill="${C.muted}">${fmt(y.start)} to ${fmt(y.end)}</text>`; });
+  $('yearsSvg').innerHTML=`<h3>Twelve months at a time</h3><svg viewBox="0 0 ${W2} ${H2}" role="img" aria-label="Yearly kWh bought">${t}</svg>`;
+}
+story();
+
+// ---------- chapter 3 seasons
+let sea='spring';
+function seasons(){
+  const arr=D.seasons[sea], W=860,H=240,mid=120, mx=Math.max(1000,...arr.map(a=>Math.abs(a.net)))*1.15, bw=W/arr.length; let s=`<line x1="0" x2="${W}" y1="${mid}" y2="${mid}" stroke="${C.ink}" stroke-width="3"/>`;
+  arr.forEach((a,i)=>{ const h=(mid-26)*Math.abs(a.net)/mx, x=i*bw+24, w=bw-48, up=a.net>0; const flag=D.flag && sea==='spring' && a.year===D.flag.year;
+    s+=`<rect x="${x}" y="${up?mid-h:mid}" width="${w}" height="${h}" rx="6" fill="${flag?C.warn:(up?C.grid:C.send)}" stroke="${C.ink}" stroke-width="3"/>
+    <text x="${x+w/2}" y="${up?mid-h-8:mid+h+20}" text-anchor="middle" font-family="Baloo 2" font-weight="800" font-size="16" fill="${C.ink}">${a.net.toLocaleString()}</text>
+    <text x="${x+w/2}" y="${up?mid+22:mid-10}" text-anchor="middle" font-family="Nunito" font-weight="800" font-size="13" fill="${C.muted}">${a.year}</text>`; });
+  $('seasonSvg').innerHTML=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${sea} net kWh by year">${s}</svg>`;
+  $('seasonTip').innerHTML=D.seasonText[sea];
+  document.querySelectorAll('[data-s]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.s===sea));
+}
+document.querySelectorAll('[data-s]').forEach(b=>b.onclick=()=>{sea=b.dataset.s;seasons()}); seasons();
+
+// ---------- chapter 4 cases
+document.querySelectorAll('.case').forEach(b=>b.onclick=()=>b.setAttribute('aria-expanded',b.getAttribute('aria-expanded')!=='true'));
+
+// ---------- chapter 5 cost
+const R=D.rates;
+$('costTbl').innerHTML=`<tr><td>Supply, each kWh</td><td class="r num">${(R.supply*100).toFixed(1)}¢</td></tr><tr><td>Delivery, each kWh</td><td class="r num">${(R.delivery*100).toFixed(1)}¢</td></tr><tr><td><b>Each extra kWh you buy</b></td><td class="r num"><b>${(R.marginal*100).toFixed(1)}¢</b></td></tr><tr><td>Fixed charges every month</td><td class="r num">$${R.fixed.toFixed(2)}</td></tr>`;
+const now=yrs[yrs.length-1].net; $('cSlide').max=Math.ceil(now*1.6/1000)*1000; $('cSlide').value=now;
+function calc(){ const k=+$('cSlide').value, c=k*R.marginal+12*R.fixed, base=now*R.marginal+12*R.fixed;
+  $('cKwh').textContent=kwh(k); $('cCost').textContent=money(c);
+  $('cDiff').textContent= Math.abs(k-now)<50 ? 'That\'s where you are today.' : (k<now? `${money(base-c)} a year less than today.` : `${money(c-base)} a year more than today.`); }
+$('cSlide').addEventListener('input',calc); calc();
+
+// ---------- chapter 6 checklist
+$('checks').innerHTML=D.checks.map((c,i)=>`<label class="check"><input type="checkbox" id="ck${i}"><span><b>${c[0]}</b> ${c[1]}</span></label>`).join('');
+</script>
+</body>
+</html>

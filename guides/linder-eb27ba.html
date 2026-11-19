@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
 <meta name="robots" content="noindex, nofollow">
+<meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Peter's Battery and Time-of-Use Guide</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -33,9 +33,11 @@ header.hero{padding:34px 0 20px}
 .hero-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:22px;align-items:center}
 .eyebrow{font-family:var(--display);font-weight:700;color:var(--peak);letter-spacing:.06em;text-transform:uppercase;font-size:14px}
 .lede{font-size:18px;color:var(--muted);margin-top:10px}
-.big{display:flex;gap:12px;flex-wrap:wrap;margin-top:16px}
+.big{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:16px}
+.stat.lead{background:#E7F6EE;border-color:var(--batt);box-shadow:4px 4px 0 var(--batt)}
+.stat.lead b{color:var(--batt)}
 .stat{background:var(--card);border:3px solid var(--ink);border-radius:18px;padding:10px 14px;box-shadow:4px 4px 0 var(--ink)}
-.stat b{display:block;font-family:var(--display);font-size:28px;line-height:1}
+.stat b{display:block;font-family:var(--display);font-size:26px;line-height:1.05;white-space:nowrap}
 .stat span{font-size:13px;color:var(--muted)}
 section.ch{padding:30px 0}
 .chhead{display:flex;gap:14px;align-items:flex-start;margin-bottom:14px}
@@ -77,26 +79,40 @@ td.r,th.r{text-align:right}
 .tip b{color:#FFD58A}
 footer{padding:30px 0 50px;color:var(--muted);font-size:13px}
 @media (max-width:720px){.hero-grid,.scene-wrap,.two{grid-template-columns:1fr}.cards{grid-template-columns:1fr 1fr}}
+@media (max-width:560px){.big,.tiles3{grid-template-columns:1fr}}
 @media (max-width:440px){.cards{grid-template-columns:1fr}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 .flow{stroke-dasharray:4 10;animation:flow 1s linear infinite}
+svg text{font-family:var(--body)}
+svg text[font-family^="Baloo"]{font-family:var(--display)}
+.outbtn{font-family:var(--display);font-weight:800;font-size:15px;border:3px solid var(--ink);border-radius:999px;background:#fff;color:var(--ink);padding:6px 16px;cursor:pointer;box-shadow:3px 3px 0 var(--ink)}
+.outbtn[aria-pressed="true"]{background:var(--warn);color:#fff}
+.counter{display:inline-block;font-family:var(--display);font-weight:800;font-size:22px;background:var(--ink);color:#FFD58A;border-radius:14px;padding:4px 14px;margin-top:10px}
+.tiles3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:14px}
+.tl{background:var(--sky);border-radius:14px;padding:10px 12px}
+.tl .k{font-size:12px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}
+.tl .v{font-family:var(--display);font-weight:800;font-size:26px;line-height:1.1}
+.tl .s{font-size:13px;color:var(--muted)}
+.ocard .small{font-size:12.5px;color:var(--muted);margin-top:8px;border-top:2px dashed var(--line);padding-top:6px}
+.ocard .v.hero{color:var(--batt);font-size:26px}
+.callout{background:#FFF8E6;border:3px solid var(--ink);border-left:8px solid var(--gold);border-radius:14px;padding:12px 14px;margin-top:14px;font-size:15px}
 @keyframes flow{to{stroke-dashoffset:-14}}
 </style>
 </head>
 <body>
 <nav class="chips" aria-label="Chapters"><div class="wrap">
-<a href="#start">Start</a><a href="#clocks">1 · Price clocks</a><a href="#day">2 · A day at home</a><a href="#split">3 · Where savings come from</a><a href="#months">4 · Month by month</a><a href="#ahead">5 · Looking ahead</a><a href="#choose">6 · Your options</a>
+<a href="#start">Start</a><a href="#backup">1 · When the power goes out</a><a href="#clocks">2 · Price clocks</a><a href="#day">3 · A day at home</a><a href="#split">4 · Where savings come from</a><a href="#months">5 · Month by month</a><a href="#ahead">6 · Looking ahead</a><a href="#choose">7 · Your options</a>
 </div></nav>
 
 <header class="hero" id="start"><div class="wrap hero-grid">
 <div>
 <div class="eyebrow">Peter Linder · 49 Pinecrest Pkwy</div>
 <h1>Your home's power day, explained.</h1>
-<p class="lede">Built from every 15-minute reading on your Con Ed meter, Nov 2025 to Oct 2026, and your all-in rates from your October bill. Tap, slide and switch seasons to see how a battery and Con Ed's time-of-use plan work for your house.</p>
+<p class="lede">Built from every 15-minute reading on your Con Ed meter, Nov 2025 to Oct 2026, and your all-in rates from your October bill. Tap, slide and switch seasons to see how long a battery keeps your lights on, and what it saves you on Con Ed's time-of-use plan.</p>
 <div class="big">
-<div class="stat"><b class="num" id="hTotal">$549</b><span id="hTotalLbl">a year, with one EG4 battery</span></div>
-<div class="stat"><b class="num" id="hSwitch">$176</b><span>from switching plans</span></div>
-<div class="stat"><b class="num" id="hBatt">$373</b><span>from the battery</span></div>
+<div class="stat lead"><b class="num" id="hBack"></b><span id="hBackLbl"></span></div>
+<div class="stat"><b class="num" id="hTotal"></b><span id="hTotalLbl"></span></div>
+<div class="stat"><b class="num" id="hBatt"></b><span id="hSplitLbl"></span></div>
 </div>
 </div>
 <div id="heroArt" aria-hidden="true"></div>
@@ -104,8 +120,23 @@ footer{padding:30px 0 50px;color:var(--muted);font-size:13px}
 
 <main class="wrap">
 
+<section class="ch" id="backup">
+<div class="chhead"><div class="badge">1</div><div><h2>When the power goes out</h2><p class="note">How long a fully charged battery runs your house, month by month, built from your own usage. Summer runs shorter because the AC is working.</p></div></div>
+<div class="panel">
+<div class="row"><label for="bOpt" class="note">Battery</label><select id="bOpt"></select>
+<div class="seg" role="group" aria-label="What stays on"><button id="mWhole" aria-pressed="true">Whole house</button><button id="mEss" aria-pressed="false">Essentials only</button></div>
+<span id="essCtl" class="note" style="display:none">Essentials draw <b id="essV" class="num"></b> <input id="ess" type="range" min="0.25" max="0.70" step="0.05" value="0.40" style="width:150px;vertical-align:middle"></span></div>
+<div class="tiles3"><div class="tl"><div class="k">Year-round average</div><div class="v num" id="bAvg"></div><div class="s">at your average use</div></div>
+<div class="tl"><div class="k" id="bMinK">Shortest month</div><div class="v num" id="bMin" style="color:var(--peak)"></div><div class="s" id="bMinS"></div></div>
+<div class="tl"><div class="k" id="bMaxK">Longest month</div><div class="v num" id="bMax" style="color:var(--batt)"></div><div class="s" id="bMaxS"></div></div></div>
+<div id="backSvg" style="margin-top:12px"></div>
+<div class="legend"><span><i style="background:var(--batt)"></i>A day or more</span><span><i style="background:var(--night)"></i>12 to 24 hrs</span><span><i style="background:var(--peak)"></i>Under 12 hrs</span></div>
+<div class="callout"><b>How your system is set up:</b> your agreement includes a backup panel. During an outage it powers the circuits we move onto it (fridge, lights, internet, heat, the outlets you pick), not the whole house. Tap <b>Essentials only</b> to see what your setup actually does. The essentials draw is an estimate you can slide.</div>
+<p class="note" style="margin-top:10px">Want to watch it happen? In chapter 3, hit <b>⚡ Power outage</b> and the battery carries the house hour by hour.</p>
+</div></section>
+
 <section class="ch" id="clocks">
-<div class="chhead"><div class="badge">1</div><div><h2>Con Ed's two price clocks</h2><p class="note">Today you pay one flat price around the clock. Time-of-use splits the day in two: cheap at night, pricier from 8 AM to midnight on weekdays.</p></div></div>
+<div class="chhead"><div class="badge">2</div><div><h2>Con Ed's two price clocks</h2><p class="note">Today you pay one flat price around the clock. Time-of-use splits the day in two: cheap at night, pricier from 8 AM to midnight on weekdays.</p></div></div>
 <div class="panel">
 <div class="row">
 <div class="seg" role="group" aria-label="Season"><button id="cSum" aria-pressed="true">☀ Summer (Jun–Sep)</button><button id="cWin" aria-pressed="false">❄ Winter (Oct–May)</button></div>
@@ -119,30 +150,32 @@ footer{padding:30px 0 50px;color:var(--muted);font-size:13px}
 </section>
 
 <section class="ch" id="day">
-<div class="chhead"><div class="badge">2</div><div><h2>A day at your house</h2><p class="note">Slide through a typical day. Watch your battery charge overnight, then carry the house through the expensive hours.</p></div></div>
+<div class="chhead"><div class="badge">3</div><div><h2>A day at your house</h2><p class="note">Slide through a typical day. Watch your battery charge overnight, then carry the house through the expensive hours.</p></div></div>
 <div class="panel">
 <div class="row">
 <div class="seg" role="group" aria-label="Season"><button id="dSum" aria-pressed="true">☀ Summer</button><button id="dWin" aria-pressed="false">❄ Winter</button></div>
 <div class="seg" role="group" aria-label="Day type"><button id="dWk" aria-pressed="true">Weekday</button><button id="dWe" aria-pressed="false">Weekend</button></div>
 <label for="dOpt" class="note">Battery</label><select id="dOpt"></select>
 <button class="playbtn" id="play">▶ Play the day</button>
+<button class="outbtn" id="outage" aria-pressed="false">⚡ Power outage</button>
 </div>
 <div class="scene-wrap">
 <div><div id="scene"></div>
-<label for="hour" class="note">Time of day: <b id="hourLbl" class="num"></b></label>
+<label for="hour" class="note"><span id="hourK">Time of day</span>: <b id="hourLbl" class="num"></b></label>
 <input type="range" id="hour" min="0" max="23" step="1" value="18">
 </div>
 <div class="readout" id="readout"></div>
 </div>
+<div id="outCounter"></div>
 <div class="bubble" id="buddySays" style="margin-top:14px"></div>
 <div style="height:14px"></div>
 <div id="dayBars"></div>
-<div class="legend"><span><i style="background:#9FB0CF"></i>Home use, off-peak</span><span><i style="background:var(--night)"></i>Charging battery</span><span><i style="background:var(--batt)"></i>From battery</span><span><i style="background:var(--peak)"></i>From grid at peak price</span></div>
+<div class="legend" id="dayLegend"><span><i style="background:#9FB0CF"></i>Home use, off-peak</span><span><i style="background:var(--night)"></i>Charging battery</span><span><i style="background:var(--batt)"></i>From battery</span><span><i style="background:var(--peak)"></i>From grid at peak price</span></div>
 </div>
 </section>
 
 <section class="ch" id="split">
-<div class="chhead"><div class="badge">3</div><div><h2>Where the savings come from</h2><p class="note">Two separate moves. <b>Switching plans</b> to time-of-use, and <b>the battery</b> moving your weekday peak use into cheap night hours.</p></div></div>
+<div class="chhead"><div class="badge">4</div><div><h2>Where the savings come from</h2><p class="note">Two separate moves. <b>Switching plans</b> to time-of-use, and <b>the battery</b> moving your weekday peak use into cheap night hours.</p></div></div>
 <div class="panel">
 <div class="row"><label for="sOpt" class="note">Battery</label><select id="sOpt"></select></div>
 <div id="splitSvg" style="margin-top:12px"></div>
@@ -154,23 +187,18 @@ footer{padding:30px 0 50px;color:var(--muted);font-size:13px}
 </section>
 
 <section class="ch" id="months">
-<div class="chhead"><div class="badge">4</div><div><h2>Your year, month by month</h2><p class="note">All-in energy cost: supply, delivery, surcharges and taxes, before your community solar credit and the monthly basic charge. Example: one EG4 battery.</p></div></div>
+<div class="chhead"><div class="badge">5</div><div><h2>Your year, month by month</h2><p class="note">All-in energy cost: supply, delivery, surcharges and taxes, before your community solar credit and the monthly basic charge. Example: EG4 16 kWh × 1.</p></div></div>
 <div class="panel">
 <div id="monthSvg"></div>
-<div class="legend"><span><i style="background:var(--flat)"></i>Today's flat plan</span><span><i style="background:var(--peak)"></i>Time-of-use, no battery</span><span><i style="background:var(--batt)"></i>Time-of-use + EG4 × 1</span></div>
+<div class="legend"><span><i style="background:var(--flat)"></i>Today's flat plan</span><span><i style="background:var(--peak)"></i>Time-of-use, no battery</span><span><i style="background:var(--batt)"></i>Time-of-use + EG4 16 kWh × 1</span></div>
 <p class="note" id="monthPick" style="margin-top:10px">Tap a month to see its numbers.</p>
 </div>
 </section>
 
 <section class="ch" id="ahead">
-<div class="chhead"><div class="badge">5</div><div><h2>Looking ahead: Con Ed's rate increases</h2><p class="note">The Public Service Commission approved Con Ed's three-year electric plan on Jan 22, 2026 (Case 25-E-0072). Higher rates make every kWh you shift worth more.</p></div></div>
+<div class="chhead"><div class="badge">6</div><div><h2>Looking ahead: Con Ed's rate increases</h2><p class="note">The Public Service Commission approved Con Ed's three-year electric plan on Jan 22, 2026 (Case 25-E-0072). Higher rates make every kWh you shift worth more.</p></div></div>
 <div class="panel">
-<table><thead><tr><th>Year</th><th class="r">Electric bill increase</th><th>Status</th></tr></thead><tbody>
-<tr><td>2026</td><td class="r num">3.6%</td><td>Approved, already in your rates</td></tr>
-<tr><td>2027</td><td class="r num">3.3%</td><td>Approved</td></tr>
-<tr><td>2028</td><td class="r num">3.2%</td><td>Approved</td></tr>
-<tr><td>2029 on</td><td class="r num">3.3%</td><td>Assumption (no approved plan yet)</td></tr>
-</tbody></table>
+<table><thead><tr><th>Year</th><th class="r">Electric bill increase</th><th>Status</th></tr></thead><tbody><tr><td>2026</td><td class="r num">3.6%</td><td>Approved, already in your rates</td></tr><tr><td>2027</td><td class="r num">3.3%</td><td>Approved</td></tr><tr><td>2028</td><td class="r num">3.2%</td><td>Approved</td></tr><tr><td>2029 on</td><td class="r num">3.3%</td><td>Assumption (no approved plan yet)</td></tr></tbody></table>
 <p class="note" style="margin-top:6px">Westchester residential total-bill increases. Systemwide: 3.5%, 3.2%, 3.1%.</p>
 <div class="row" style="margin-top:14px"><label for="aOpt" class="note">Battery</label><select id="aOpt"></select></div>
 <div id="aheadSvg" style="margin-top:10px"></div>
@@ -179,31 +207,33 @@ footer{padding:30px 0 50px;color:var(--muted);font-size:13px}
 </section>
 
 <section class="ch" id="choose">
-<div class="chhead"><div class="badge">6</div><div><h2>Your options, side by side</h2><p class="note">Tap a card to load it into every chapter above.</p></div></div>
+<div class="chhead"><div class="badge">7</div><div><h2>Your options, side by side</h2><p class="note">Tap a card to load it into every chapter above.</p></div></div>
 <div class="cards" id="cards"></div>
-<div class="tip" style="margin-top:16px"><b>The honest bottom line:</b> on your usage, the savings make a battery cheaper to own, but they won't pay it back quickly. The real reason to get one is <b>backup power when the grid goes down</b>. One battery covers your essentials through a typical outage; two stretch to a day or more.</div>
+<div class="tip" style="margin-top:16px"><b>The honest bottom line:</b> the reason to get a battery is <b>backup power when the grid goes down</b>. EG4 16 kWh × 1 runs your whole house about 19 hours at average use, and a lot longer on just your essentials. On top of that, switching plans is worth about $176 a year and the battery adds about $373, so the savings make that backup cheaper to own.</div>
 </section>
 
 </main>
 <footer><div class="wrap">
-<p><b>How this was built.</b> Your Con Ed interval data (5,912 kWh, Nov 1 2025 to Oct 31 2026). All-in rates rebuilt from your Sept 15 to Oct 15, 2026 bill and checked against it to the cent ($142.71): supply 12.173¢ plus merchant function charge, Con Ed delivery with 2026 riders, system benefit charge, gross receipts tax and 4% sales tax. Time-of-use: peak weekdays 8 AM to midnight, off-peak midnight to 8 AM and weekends. Battery charges overnight at 90% round-trip efficiency and covers peak use until empty. Supply held the same on both plans. Battery savings reduced 1% a year for capacity fade. Net prices are after the NYSERDA storage incentive. Estimates only; actual savings depend on future rates and how your use changes.</p>
+<p><b>How this was built.</b> Your Con Ed interval data (5,912 kWh, Nov 1 2025 to Oct 31 2026). All-in rates rebuilt from your Sep 15 to Oct 15, 2026 bill and checked against it ($142.71): Con Ed supply plus merchant function charge, Con Ed delivery with current riders, system benefit charge, gross receipts tax and sales tax. Time-of-use: peak weekdays 8 AM to midnight, off-peak midnight to 8 AM and weekends. Battery charges overnight at 90% round-trip efficiency and covers peak use until empty. Supply held the same on both plans. Battery savings reduced 1% a year for capacity fade. Net prices are after the NYSERDA storage incentive. Backup hours assume a full battery at the start of the outage and no solar recharging. Estimates only; actual savings depend on future rates and how your use changes.</p>
 <p style="margin-top:10px">Godfrey English · Energy Consultant, Rivertown Solar · (347) 395-7807 · 32 Main St, Dobbs Ferry NY 10522</p>
 </div></footer>
 
 <script>
-const D = {"rates": {"pk_s": 0.46661194904909287, "pk_w": 0.3510185111991488, "off": 0.22316679249814095, "el1_s": 0.359765625, "el1_w": 0.34337708830548924}, "switch": {"summer": -1, "winter": 177}, "el1": {"summer": 921, "winter": 1151}, "nb": {"summer": 922, "winter": 974}, "opts": [{"name": "EG4 16 kWh \u00d7 1", "u": 12.8, "cost": 16585, "battery": {"summer": 203, "winter": 170}, "total": 549, "cum": [567, 1148, 1745, 2357, 2985, 3629, 4290, 4968, 5664, 6379, 7111, 7864, 8636, 9428, 10241, 11075, 11931, 12810, 13713, 14638, 15589, 16564, 17566, 18594, 19649], "pay": 23, "backup": 19.0, "cover": 80}, {"name": "EG4 16 kWh \u00d7 2", "u": 25.6, "cost": 21440, "battery": {"summer": 275, "winter": 181}, "total": 632, "cum": [653, 1322, 2008, 2711, 3433, 4173, 4932, 5710, 6509, 7328, 8168, 9030, 9914, 10821, 11751, 12705, 13684, 14689, 15719, 16776, 17860, 18973, 20115, 21286, 22488], "pay": 25, "backup": 38.0, "cover": 94}, {"name": "Enphase IQ 10C \u00d7 1", "u": 10.0, "cost": 19838, "battery": {"summer": 175, "winter": 157}, "total": 508, "cum": [525, 1063, 1615, 2182, 2763, 3360, 3973, 4602, 5247, 5909, 6589, 7288, 8004, 8740, 9495, 10270, 11066, 11883, 12721, 13583, 14467, 15374, 16307, 17264, 18246], "pay": 27, "backup": 14.9, "cover": 73}, {"name": "Enphase IQ 10C \u00d7 2", "u": 20.0, "cost": 27867, "battery": {"summer": 252, "winter": 179}, "total": 607, "cum": [627, 1270, 1929, 2604, 3298, 4009, 4739, 5487, 6255, 7042, 7850, 8679, 9529, 10401, 11296, 12214, 13156, 14123, 15115, 16132, 17176, 18248, 19347, 20475, 21633], "pay": 30, "backup": 29.7, "cover": 90}, {"name": "FranklinWH aPower 2 \u00d7 1", "u": 15.0, "cost": 20742, "battery": {"summer": 221, "winter": 175}, "total": 572, "cum": [591, 1196, 1818, 2455, 3109, 3780, 4468, 5174, 5898, 6642, 7404, 8187, 8990, 9814, 10659, 11527, 12417, 13331, 14269, 15231, 16218, 17232, 18272, 19340, 20436], "pay": 26, "backup": 22.3, "cover": 84}, {"name": "FranklinWH aPower 2 \u00d7 2", "u": 30.0, "cost": 31870, "battery": {"summer": 288, "winter": 182}, "total": 646, "cum": [667, 1351, 2052, 2771, 3508, 4265, 5040, 5836, 6651, 7488, 8346, 9227, 10130, 11056, 12006, 12980, 13980, 15005, 16057, 17137, 18244, 19379, 20545, 21740, 22967], "pay": 32, "backup": 44.6, "cover": 96}], "monthly": [{"m": "Nov", "kwh": 413, "el1": 142, "tou0": 119, "tou1": 98, "short": 3, "wk": 20}, {"m": "Dec", "kwh": 534, "el1": 183, "tou0": 160, "tou1": 131, "short": 15, "wk": 23}, {"m": "Jan", "kwh": 462, "el1": 158, "tou0": 133, "tou1": 110, "short": 6, "wk": 22}, {"m": "Feb", "kwh": 403, "el1": 138, "tou0": 115, "tou1": 95, "short": 2, "wk": 20}, {"m": "Mar", "kwh": 379, "el1": 130, "tou0": 108, "tou1": 89, "short": 1, "wk": 22}, {"m": "Apr", "kwh": 340, "el1": 117, "tou0": 100, "tou1": 81, "short": 1, "wk": 22}, {"m": "May", "kwh": 461, "el1": 158, "tou0": 135, "tou1": 114, "short": 4, "wk": 21}, {"m": "Jun", "kwh": 536, "el1": 192, "tou0": 196, "tou1": 148, "short": 8, "wk": 22}, {"m": "Jul", "kwh": 910, "el1": 330, "tou0": 334, "tou1": 273, "short": 19, "wk": 23}, {"m": "Aug", "kwh": 739, "el1": 267, "tou0": 260, "tou1": 208, "short": 13, "wk": 21}, {"m": "Sep", "kwh": 375, "el1": 132, "tou0": 132, "tou1": 90, "short": 2, "wk": 22}, {"m": "Oct", "kwh": 360, "el1": 124, "tou0": 105, "tou1": 85, "short": 1, "wk": 22}], "prof": {"summer": [0.502, 0.497, 0.492, 0.472, 0.444, 0.598, 0.674, 0.898, 0.628, 0.723, 0.773, 0.748, 0.87, 0.982, 1.041, 1.225, 1.718, 1.786, 1.323, 1.195, 1.059, 0.935, 0.76, 0.587], "winter": [0.288, 0.279, 0.339, 0.365, 0.376, 0.392, 0.433, 0.868, 0.456, 0.384, 0.344, 0.348, 0.538, 0.504, 0.508, 0.566, 0.911, 1.105, 0.852, 0.907, 1.015, 0.848, 0.604, 0.4], "summer_we": [0.509, 0.481, 0.462, 0.474, 0.46, 0.58, 0.602, 0.873, 0.866, 0.723, 0.693, 0.626, 0.899, 0.943, 0.909, 0.916, 1.592, 1.922, 1.417, 1.427, 1.449, 1.071, 0.667, 0.584], "winter_we": [0.256, 0.245, 0.278, 0.33, 0.353, 0.388, 0.427, 0.828, 0.581, 0.488, 0.438, 0.429, 0.633, 0.623, 0.567, 0.601, 0.826, 1.061, 0.91, 0.943, 0.904, 0.962, 0.678, 0.435]}, "runout": {"summer": {"days": 42, "of": 88, "median_hour": 17}, "winter": {"days": 33, "of": 172, "median_hour": 21}}, "calib": 142.71};
-const S = {opt:0, cSeason:'summer', cWeekend:false, dSeason:'summer', dWeekend:false, hour:18, playing:null};
+const D = {"rates": {"pk_s": 0.4666054016844429, "pk_w": 0.3510119638344989, "off": 0.2231602451334911, "off_s": 0.2231602451334911, "el1_s": 0.3594952957698431, "el1_w": 0.3433989262533119}, "switch": {"summer": -1, "winter": 177}, "el1": {"summer": 921, "winter": 1151}, "nb": {"summer": 922, "winter": 974}, "opts": [{"name": "EG4 16 kWh \u00d7 1", "u": 12.8, "cost": 16585, "battery": {"summer": 203, "winter": 170}, "total": 549, "cum": [567, 1148, 1745, 2357, 2985, 3629, 4290, 4968, 5664, 6379, 7111, 7864, 8636, 9428, 10241, 11075, 11931, 12810, 13713, 14638, 15589, 16564, 17566, 18594, 19649], "pay": 23, "backup": 19.0, "cover": 80}, {"name": "EG4 16 kWh \u00d7 2", "u": 25.6, "cost": 21440, "battery": {"summer": 275, "winter": 181}, "total": 632, "cum": [653, 1322, 2008, 2711, 3433, 4173, 4932, 5710, 6509, 7328, 8168, 9030, 9914, 10821, 11751, 12705, 13684, 14689, 15719, 16776, 17860, 18973, 20115, 21286, 22488], "pay": 25, "backup": 37.9, "cover": 94}, {"name": "Enphase IQ 10C \u00d7 1", "u": 10.0, "cost": 19838, "battery": {"summer": 175, "winter": 157}, "total": 508, "cum": [525, 1063, 1615, 2182, 2763, 3360, 3973, 4602, 5247, 5909, 6589, 7288, 8004, 8740, 9495, 10270, 11066, 11883, 12721, 13583, 14467, 15374, 16307, 17264, 18246], "pay": 27, "backup": 14.8, "cover": 73}, {"name": "Enphase IQ 10C \u00d7 2", "u": 20.0, "cost": 27867, "battery": {"summer": 252, "winter": 179}, "total": 607, "cum": [627, 1270, 1929, 2604, 3298, 4009, 4739, 5487, 6255, 7042, 7850, 8679, 9529, 10401, 11296, 12214, 13156, 14123, 15115, 16132, 17176, 18248, 19347, 20475, 21633], "pay": 30, "backup": 29.6, "cover": 90}, {"name": "FranklinWH aPower 2 \u00d7 1", "u": 15.0, "cost": 20742, "battery": {"summer": 221, "winter": 175}, "total": 572, "cum": [591, 1196, 1818, 2455, 3109, 3780, 4468, 5174, 5898, 6642, 7404, 8187, 8990, 9814, 10659, 11527, 12417, 13331, 14269, 15231, 16218, 17232, 18272, 19340, 20436], "pay": 26, "backup": 22.2, "cover": 84}, {"name": "FranklinWH aPower 2 \u00d7 2", "u": 30.0, "cost": 31870, "battery": {"summer": 288, "winter": 182}, "total": 646, "cum": [667, 1351, 2052, 2771, 3508, 4265, 5040, 5836, 6651, 7488, 8346, 9227, 10130, 11056, 12006, 12980, 13980, 15005, 16057, 17137, 18244, 19379, 20545, 21740, 22967], "pay": 32, "backup": 44.5, "cover": 96}], "monthly": [{"m": "Nov", "kwh": 413, "el1": 142, "tou0": 119, "tou1": 98, "short": 3, "wk": 20, "days": 30}, {"m": "Dec", "kwh": 534, "el1": 183, "tou0": 160, "tou1": 131, "short": 15, "wk": 23, "days": 31}, {"m": "Jan", "kwh": 462, "el1": 158, "tou0": 133, "tou1": 110, "short": 6, "wk": 22, "days": 31}, {"m": "Feb", "kwh": 403, "el1": 138, "tou0": 115, "tou1": 95, "short": 2, "wk": 20, "days": 28}, {"m": "Mar", "kwh": 379, "el1": 130, "tou0": 108, "tou1": 89, "short": 1, "wk": 22, "days": 31}, {"m": "Apr", "kwh": 340, "el1": 117, "tou0": 100, "tou1": 81, "short": 1, "wk": 22, "days": 30}, {"m": "May", "kwh": 461, "el1": 158, "tou0": 135, "tou1": 114, "short": 4, "wk": 21, "days": 31}, {"m": "Jun", "kwh": 536, "el1": 192, "tou0": 196, "tou1": 148, "short": 8, "wk": 22, "days": 30}, {"m": "Jul", "kwh": 910, "el1": 330, "tou0": 334, "tou1": 273, "short": 19, "wk": 23, "days": 31}, {"m": "Aug", "kwh": 739, "el1": 267, "tou0": 260, "tou1": 208, "short": 13, "wk": 21, "days": 31}, {"m": "Sep", "kwh": 375, "el1": 132, "tou0": 132, "tou1": 90, "short": 2, "wk": 22, "days": 30}, {"m": "Oct", "kwh": 360, "el1": 124, "tou0": 105, "tou1": 85, "short": 1, "wk": 22, "days": 31}], "prof": {"summer": [0.502, 0.497, 0.492, 0.472, 0.444, 0.598, 0.674, 0.898, 0.628, 0.723, 0.773, 0.748, 0.87, 0.982, 1.041, 1.225, 1.718, 1.786, 1.323, 1.195, 1.059, 0.935, 0.76, 0.587], "winter": [0.288, 0.279, 0.339, 0.365, 0.376, 0.392, 0.433, 0.868, 0.456, 0.384, 0.344, 0.348, 0.538, 0.504, 0.508, 0.566, 0.911, 1.105, 0.852, 0.907, 1.015, 0.848, 0.604, 0.4], "summer_we": [0.509, 0.481, 0.462, 0.474, 0.46, 0.58, 0.602, 0.873, 0.866, 0.723, 0.693, 0.626, 0.899, 0.943, 0.909, 0.916, 1.592, 1.922, 1.417, 1.427, 1.449, 1.071, 0.667, 0.584], "winter_we": [0.256, 0.245, 0.278, 0.33, 0.353, 0.388, 0.427, 0.828, 0.581, 0.488, 0.438, 0.429, 0.633, 0.623, 0.567, 0.601, 0.826, 1.061, 0.91, 0.943, 0.904, 0.962, 0.678, 0.435]}, "calib": 142.71, "refName": "EG4 16 kWh \u00d7 1", "annual": 5912, "ndays": 365};
+const S = {opt:0, cSeason:'summer', cWeekend:false, dSeason:'summer', dWeekend:false, hour:18, playing:null, mode:'whole', ess:0.40, out:false, outStart:18, outT:0};
+const CAP=96;
 const $ = id => document.getElementById(id);
 const money = x => (x<0?'-$':'$') + Math.abs(Math.round(x)).toLocaleString();
 const cents = x => (x*100).toFixed(1) + '¢';
 const hr = h => ((h%12)||12) + (h<12?' AM':' PM');
-const C = {night:'#3D5A9E', peak:'#EE8B2B', batt:'#25A26B', flat:'#8A94A8', ink:'#1C2B4A', muted:'#5B6782', line:'#D9E2EE', offuse:'#9FB0CF'};
+const C = {warn:'#C8452F', night:'#3D5A9E', peak:'#EE8B2B', batt:'#25A26B', flat:'#8A94A8', ink:'#1C2B4A', muted:'#5B6782', line:'#D9E2EE', offuse:'#9FB0CF'};
 const RTE = 0.9;
-function rate(season, weekend, h){ if(weekend || h<8) return D.rates.off; return season==='summer'?D.rates.pk_s:D.rates.pk_w; }
+function offRate(season){ return season==='summer' && D.rates.off_s ? D.rates.off_s : D.rates.off; }
+function rate(season, weekend, h){ if(weekend || h<8) return offRate(season); return season==='summer'?D.rates.pk_s:D.rates.pk_w; }
 function flatRate(season){ return season==='summer'?D.rates.el1_s:D.rates.el1_w; }
 
 // ---------- option selects + cards
-const selects=['dOpt','sOpt','aOpt'];
+const selects=['bOpt','dOpt','sOpt','aOpt'];
 selects.forEach(id=>{ const s=$(id); D.opts.forEach((o,i)=>{ const op=document.createElement('option'); op.value=i; op.textContent=o.name; s.appendChild(op); }); s.addEventListener('change',e=>setOpt(+e.target.value)); });
 function setOpt(i){ S.opt=i; selects.forEach(id=>$(id).value=i); renderAll(); }
 
@@ -233,7 +263,43 @@ function heroArt(){
   <path d="M178 170 C196 170 198 160 214 160" stroke="${C.batt}" stroke-width="5" fill="none" class="flow" stroke-linecap="round"/></svg>`;
 }
 
-// ---------- chapter 1 clocks
+
+// ---------- chapter 1 backup
+const fmtH = h => h>=CAP ? CAP+'+ hrs' : (h>=10?Math.round(h):h.toFixed(1))+' hrs';
+function mDraw(m){ return S.mode==='whole' ? m.kwh/(m.days*24) : S.ess; }
+function backup(){
+  const o=D.opts[S.opt], ms=D.monthly, hs=ms.map(m=>Math.min(CAP,o.u/mDraw(m)));
+  const avg = S.mode==='whole' ? D.annual/(D.ndays*24) : S.ess;
+  $('bAvg').textContent=fmtH(Math.min(CAP,o.u/avg));
+  if(S.mode==='whole'){ const mn=Math.min(...hs),mx=Math.max(...hs);
+    $('bMinK').textContent='Shortest month'; $('bMaxK').textContent='Longest month';
+    $('bMin').textContent=fmtH(mn); $('bMinS').textContent=ms[hs.indexOf(mn)].m;
+    $('bMax').textContent=fmtH(mx); $('bMaxS').textContent=ms[hs.indexOf(mx)].m;
+  } else { const rs=[...Array(24).keys()].map(h=>simOut(h,'summer').hours), a=Math.min(...rs), b=Math.max(...rs);
+    $('bMinK').textContent='Shortest, by start time'; $('bMaxK').textContent='Longest, by start time';
+    $('bMin').textContent=fmtH(a); $('bMinS').textContent='outage at '+hr(rs.indexOf(a))+', summer';
+    $('bMax').textContent=fmtH(b); $('bMaxS').textContent='outage at '+hr(rs.indexOf(b))+', summer'; }
+  const W=860,H=260,L=46,R=10,T=18,B=34, top=Math.max(30,Math.ceil(Math.max(...hs)/12)*12), y=v=>T+(H-T-B)*(1-v/top), bw=(W-L-R)/ms.length; let s='';
+  for(let g=0;g<=top;g+=12) s+=`<line x1="${L}" x2="${W-R}" y1="${y(g)}" y2="${y(g)}" stroke="${C.line}" stroke-width="2"/><text x="${L-8}" y="${y(g)+4}" text-anchor="end" font-size="12" fill="${C.muted}">${g}h</text>`;
+  s+=`<line x1="${L}" x2="${W-R}" y1="${y(24)}" y2="${y(24)}" stroke="${C.batt}" stroke-width="2.5" stroke-dasharray="6 5"/><text x="${L+4}" y="${y(24)-6}" text-anchor="start" font-family="Baloo 2" font-weight="800" font-size="13" fill="${C.batt}">1 full day</text>`;
+  hs.forEach((h,i)=>{ const x=L+i*bw+bw*.15, w=bw*.7, col=h>=24?C.batt:h>=12?C.night:C.peak;
+    s+=`<rect x="${x}" y="${y(h)}" width="${w}" height="${y(0)-y(h)}" rx="6" fill="${col}" stroke="${C.ink}" stroke-width="2"/>
+    <text x="${x+w/2}" y="${y(h)-6}" text-anchor="middle" font-family="Baloo 2" font-weight="800" font-size="14" fill="${C.ink}">${h>=CAP?CAP+'+':Math.round(h)}</text>
+    <text x="${x+w/2}" y="${H-10}" text-anchor="middle" font-size="12" font-weight="800" fill="${C.ink}">${ms[i].m}</text>`; });
+  $('backSvg').innerHTML=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Backup hours by month">${s}</svg>`;
+  $('mWhole').setAttribute('aria-pressed',S.mode==='whole'); $('mEss').setAttribute('aria-pressed',S.mode==='ess');
+  $('essCtl').style.display=S.mode==='ess'?'':'none'; $('essV').textContent=S.ess.toFixed(2)+' kW';
+}
+// outage run: battery full at the start hour, house on battery only
+function simOut(start, sea){
+  const o=D.opts[S.opt], base=D.prof[sea], mean=base.reduce((a,b)=>a+b,0)/24;
+  const Lp = S.mode==='whole' ? base : base.map(x=>x*S.ess/mean);
+  let e=o.u, t=0; const soc=[e];
+  while(t<CAP){ const kw=Lp[(start+t)%24]; if(e<=kw){ t+=e/kw; e=0; soc.push(0); break; } e-=kw; t+=1; soc.push(e); }
+  return {hours: e>0?CAP:t, soc, load:Lp};
+}
+
+// ---------- chapter 2 clocks
 function clock(){
   const sea=S.cSeason, we=S.cWeekend; const cx=150,cy=150,r1=118,r0=74; let s='';
   for(let h=0;h<24;h++){
@@ -243,22 +309,22 @@ function clock(){
     s+=`<path d="M${p(r0,a0)} L${p(r1,a0)} A${r1},${r1} 0 0 1 ${p(r1,a1)} L${p(r0,a1)} A${r0},${r0} 0 0 0 ${p(r0,a0)} Z" fill="${col}" stroke="#fff" stroke-width="2"/>`;
     if(h%3===0){ const a=(h/24)*2*Math.PI-Math.PI/2; s+=`<text x="${cx+(r1+16)*Math.cos(a)}" y="${cy+(r1+16)*Math.sin(a)+4}" text-anchor="middle" font-family="Nunito" font-weight="800" font-size="12" fill="${C.ink}">${(h%12)||12}${h<12?'a':'p'}</text>`; }
   }
-  const pk=we?D.rates.off:(sea==='summer'?D.rates.pk_s:D.rates.pk_w);
+  const pk=we?offRate(sea):(sea==='summer'?D.rates.pk_s:D.rates.pk_w);
   s+=`<circle cx="${cx}" cy="${cy}" r="${r0-6}" fill="#fff" stroke="${C.ink}" stroke-width="4"/>
   <text x="${cx}" y="${cy-8}" text-anchor="middle" font-family="Baloo 2" font-weight="800" font-size="16" fill="${C.ink}">${sea==='summer'?'Summer':'Winter'}</text>
   <text x="${cx}" y="${cy+14}" text-anchor="middle" font-family="Baloo 2" font-weight="800" font-size="16" fill="${C.ink}">${we?'weekend':'weekday'}</text>`;
   $('clockSvg').innerHTML=`<svg viewBox="-10 -10 320 320" role="img" aria-label="24-hour price clock">${s}</svg>`;
   const flat=flatRate(sea);
   $('clockText').innerHTML = we
-   ? `<h3>Weekends are all off-peak</h3><p style="margin-top:8px">Every hour costs <b>${cents(D.rates.off)}</b> a kWh all-in, against about <b>${cents(flat)}</b> on today's flat plan. Your battery takes the weekend off and stays full, ready for an outage.</p>`
+   ? `<h3>Weekends are all off-peak</h3><p style="margin-top:8px">Every hour costs <b>${cents(offRate(sea))}</b> a kWh all-in, against about <b>${cents(flat)}</b> on today's flat plan. Your battery takes the weekend off and stays full, ready for an outage.</p>`
    : `<h3>${sea==='summer'?'Summer':'Winter'} weekday prices</h3>
    <div style="display:grid;gap:8px;margin-top:10px">
-   <div class="ro"><span><span class="pill off">Off-peak</span> midnight to 8 AM</span><b class="num">${cents(D.rates.off)}</b></div>
+   <div class="ro"><span><span class="pill off">Off-peak</span> midnight to 8 AM</span><b class="num">${cents(offRate(sea))}</b></div>
    <div class="ro"><span><span class="pill peak">Peak</span> 8 AM to midnight</span><b class="num">${cents(pk)}</b></div>
    <div class="ro"><span>Today's flat plan, any hour</span><b class="num">${cents(flat)}</b></div></div>
-   <p class="note" style="margin-top:8px">${sea==='summer'
-     ? 'Summer peak costs more than today\'s flat price. Without a battery, your expensive summer evenings cancel out the cheap nights.'
-     : 'Winter peak is about the same as today\'s flat price, and nights are much cheaper. That\'s why switching alone pays in winter.'}</p>`;
+   <p class="note" style="margin-top:8px">${pk>flat*1.05
+     ? `${sea==='summer'?'Summer':'Winter'} peak costs ${cents(pk-flat)} more than today's flat price. Without a battery, your expensive ${sea} evenings eat into the savings from cheap nights.`
+     : `${sea==='summer'?'Summer':'Winter'} peak is about the same as today's flat price, and nights are much cheaper. That's why switching alone pays in ${sea}.`}</p>`;
   $('cSum').setAttribute('aria-pressed',sea==='summer'); $('cWin').setAttribute('aria-pressed',sea==='winter');
   $('cWk').setAttribute('aria-pressed',!we); $('cWe').setAttribute('aria-pressed',we);
 }
@@ -277,7 +343,65 @@ function simulate(){
   }
   return rows;
 }
+
+function sceneOut(){
+  const o=D.opts[S.opt], sea=S.dSeason, r=simOut(S.outStart, sea), span=Math.min(CAP, Math.ceil(r.hours)+1);
+  if(S.outT>span) S.outT=span; const t=S.outT, h=(S.outStart+t)%24;
+  const soc = t<r.soc.length ? r.soc[t] : 0, level=o.u?soc/o.u:0, alive = t < r.hours;
+  const night = h<6 || h>=20, dusk = h>=17 && h<20, dawn = h>=6 && h<8;
+  const sky = night ? '#1A2440' : dusk ? '#6E6A86' : dawn ? '#8A8AA0' : (sea==='summer'?'#7FA9C4':'#A3B4C2');
+  const ang = Math.PI*(1-(h-5)/15); const sunX=320+250*Math.cos(ang), sunY=230-150*Math.max(0,Math.sin(ang));
+  const lit = alive; const load = r.load[h];
+  $('hour').max=span; $('hour').value=t; $('hourK').textContent='Hours into the outage';
+  $('hourLbl').textContent=t+' hrs ('+hr(h)+')';
+  $('scene').innerHTML=`<svg viewBox="0 0 640 300" role="img" aria-label="Power outage, ${t} hours in">
+  <rect width="640" height="300" fill="${sky}"/><rect width="640" height="300" fill="#000" opacity=".18"/>
+  ${night?Array.from({length:18},(_,i)=>`<circle cx="${(i*97)%640}" cy="${(i*53)%120+10}" r="2" fill="#fff" opacity=".8"/>`).join(''):''}
+  ${!night?(sunX<440||sunY<90?`<circle cx="${sunX}" cy="${sunY}" r="26" fill="#FFD58A" stroke="${C.ink}" stroke-width="4" opacity=".8"/>`:''):`<path d="M560 60 a28 28 0 1 0 22 46 a22 22 0 1 1 -22 -46 Z" fill="#F4F1DE" stroke="${C.ink}" stroke-width="3"/>`}
+  <rect y="242" width="640" height="58" fill="${sea==='summer'?'#7FB07C':'#C9D0D6'}"/><path d="M0 242 H640" stroke="${C.ink}" stroke-width="4"/>
+  <rect x="58" y="80" width="12" height="164" fill="#8A6A4A" stroke="${C.ink}" stroke-width="3"/><rect x="34" y="88" width="60" height="9" fill="#8A6A4A" stroke="${C.ink}" stroke-width="3"/>
+  <g transform="translate(16,20)"><rect width="110" height="40" rx="10" fill="${C.warn}" stroke="${C.ink}" stroke-width="3"/>
+  <text x="55" y="26" text-anchor="middle" font-family="Baloo 2" font-weight="800" font-size="16" fill="#fff">GRID DOWN</text></g>
+  <path d="M94 96 C130 108 150 116 165 122" stroke="${C.ink}" stroke-width="3" fill="none"/><path d="M200 132 C220 138 235 144 250 150" stroke="${C.ink}" stroke-width="3" fill="none"/>
+  <g transform="translate(182,128)"><path d="M-10 -10 L10 10 M10 -10 L-10 10" stroke="${C.warn}" stroke-width="6" stroke-linecap="round"/></g>
+  <path d="M240 160 L340 86 L440 160 Z" fill="${C.peak}" stroke="${C.ink}" stroke-width="4" stroke-linejoin="round"/>
+  <rect x="256" y="158" width="168" height="86" fill="#fff" stroke="${C.ink}" stroke-width="4"/>
+  <rect x="276" y="176" width="34" height="30" fill="${lit?'#FFE7A8':'#3A4560'}" stroke="${C.ink}" stroke-width="3"/>
+  <rect x="370" y="176" width="34" height="30" fill="${lit?'#FFE7A8':'#3A4560'}" stroke="${C.ink}" stroke-width="3"/>
+  ${lit?`<circle cx="293" cy="191" r="26" fill="#FFE7A8" opacity=".25"/><circle cx="387" cy="191" r="26" fill="#FFE7A8" opacity=".25"/>`:''}
+  <rect x="324" y="200" width="30" height="44" fill="${C.night}" stroke="${C.ink}" stroke-width="3"/>
+  ${battery(490,140,90,104,level,alive?(level<0.15?'tired':'happy'):'tired')}
+  ${alive?`<path d="M490 200 C470 200 450 205 424 205" stroke="${C.batt}" stroke-width="7" fill="none" class="flow" stroke-linecap="round"/>`:''}
+  <text x="535" y="266" text-anchor="middle" font-family="Baloo 2" font-weight="800" font-size="15" fill="${C.ink}">${Math.round(level*100)}% full</text>
+  </svg>`;
+  const what = S.mode==='whole'?'the whole house':'your essentials';
+  $('readout').innerHTML=`
+   <div class="ro"><span>Grid</span><b><span class="pill" style="background:${C.warn};color:#fff">Down</span></b></div>
+   <div class="ro"><span>Outage started</span><b class="num">${hr(S.outStart)}</b></div>
+   <div class="ro"><span>Running</span><b>${S.mode==='whole'?'Whole house':'Essentials only'}</b></div>
+   <div class="ro"><span>Your house is using</span><b class="num">${alive?load.toFixed(2):'0.00'} kWh</b></div>
+   <div class="ro"><span>Battery left</span><b class="num">${soc.toFixed(1)} of ${o.u} kWh</b></div>
+   <p class="note">Assumes the battery is full when the outage hits. Setting a backup reserve keeps it that way. Switch whole house or essentials in chapter 1.</p>`;
+  $('outCounter').innerHTML = alive ? `<span class="counter">💡 Lights on: ${t} hrs</span>` : `<span class="counter" style="color:#fff;background:${C.warn}">Battery empty after ${fmtH(r.hours)}</span>`;
+  $('buddySays').textContent='🔋 '+(alive
+    ? (t===0 ? `The grid just went down at ${hr(S.outStart)}. I've got ${what} from here. Hit play and watch.` : `${t} hours in and ${what} is still running on me. ${soc.toFixed(1)} kWh left, about ${fmtH(r.hours-t)} to go at this pace.`)
+    : `I carried ${what} for about ${fmtH(r.hours)} on this ${sea} day. ${r.hours>=24?'That\'s a full day and night.':'A second battery, or running just your essentials, stretches that a lot.'}`);
+  // drain chart
+  const W=860,H=170,Lx=40,B=24, X=v=>Lx+(W-Lx-10)*v/span, Y=p=>10+(H-B-10)*(1-p); let s='';
+  for(let i=0;i<span;i++){ const hh=(S.outStart+i)%24; if(hh>=21||hh<7) s+=`<rect x="${X(i)}" y="10" width="${X(i+1)-X(i)}" height="${H-B-10}" fill="${C.night}" opacity=".08"/>`; }
+  [0,.5,1].forEach(f=>s+=`<line x1="${Lx}" x2="${W-10}" y1="${Y(f)}" y2="${Y(f)}" stroke="${C.line}" stroke-width="2"/><text x="${Lx-6}" y="${Y(f)+4}" text-anchor="end" font-size="11" fill="${C.muted}">${f*100}%</text>`);
+  const pts=r.soc.map((v,i)=>`${X(Math.min(i,r.hours))},${Y(v/o.u)}`).join(' ');
+  s+=`<polyline points="${pts}" fill="none" stroke="${C.batt}" stroke-width="4" stroke-linejoin="round"/>`;
+  s+=`<line x1="${X(t)}" x2="${X(t)}" y1="10" y2="${H-B}" stroke="${C.ink}" stroke-width="2.5"/><circle cx="${X(t)}" cy="${Y(level)}" r="6" fill="${C.batt}" stroke="${C.ink}" stroke-width="2.5"/>`;
+  const st = span<=30?3:span<=60?6:12; for(let i=0;i<=span;i+=st) s+=`<text x="${X(i)}" y="${H-6}" text-anchor="middle" font-size="11" fill="${C.muted}">${hr((S.outStart+i)%24)}</text>`;
+  $('dayBars').innerHTML=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Battery charge during the outage">${s}</svg>`;
+  $('dSum').setAttribute('aria-pressed',sea==='summer'); $('dWin').setAttribute('aria-pressed',sea==='winter');
+  $('dWk').setAttribute('aria-pressed',!S.dWeekend); $('dWe').setAttribute('aria-pressed',S.dWeekend);
+}
 function scene(){
+  $('dayLegend').style.display=S.out?'none':'';
+  if(S.out) return sceneOut();
+  $('hour').max=23; $('hourK').textContent='Time of day'; $('outCounter').innerHTML='';
   const rows=simulate(), o=D.opts[S.opt], sea=S.dSeason, we=S.dWeekend, h=S.hour, r=rows[h];
   const night = h<6 || h>=20, dusk = h>=17 && h<20, dawn = h>=6 && h<8;
   const sky = night ? '#22325A' : dusk ? '#F6B26B' : dawn ? '#F9D9A7' : (sea==='summer'?'#9CD3F5':'#C9DCEB');
@@ -360,14 +484,14 @@ function split(){
       <rect x="${L+150}" y="185" width="14" height="14" fill="${C.batt}" stroke="${C.ink}"/><text x="${L+170}" y="197" font-size="13" font-family="Nunito" fill="${C.ink}">The battery</text>`;
   $('splitSvg').innerHTML=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Savings split by season">${s}</svg>`;
   const swt=sw.summer+sw.winter, bt=b.summer+b.winter, tot=swt+bt;
-  $('splitTip1').innerHTML=`<b>Switching plans: ${money(swt)} a year (${Math.round(100*swt/tot)}%).</b> All of it comes in winter. In summer, peak power costs more than today's flat price and cancels out your cheap nights.`;
+  $('splitTip1').innerHTML=`<b>Switching plans: ${money(swt)} a year (${Math.round(100*swt/tot)}%).</b> ${sw.summer<=0?'All of it comes in winter. In summer, peak power costs more than today\'s flat price and cancels out your cheap nights.':money(sw.summer)+' in summer and '+money(sw.winter)+' in winter, with no change in how you live.'}`;
   $('splitTip2').innerHTML=`<b>The battery (${o.name}): ${money(bt)} a year (${Math.round(100*bt/tot)}%).</b> ${money(b.summer)} in summer and ${money(b.winter)} in winter. The battery is what makes summer pay.`;
 }
 
 // ---------- chapter 4 months
 function months(){
-  const W=860,H=250,L=44,B=28, mx=360, bw=(W-L-8)/12; let s='';
-  [100,200,300].forEach(v=>{ const y=10+(H-B-10)*(1-v/mx); s+=`<line x1="${L}" x2="${W}" y1="${y}" y2="${y}" stroke="${C.line}" stroke-width="2"/><text x="${L-6}" y="${y+4}" text-anchor="end" font-size="11" fill="${C.muted}" font-family="Nunito">$${v}</text>`; });
+  const W=860,H=250,L=44,B=28, top=Math.max(...D.monthly.map(m=>m.el1)), st=top>900?300:top>450?200:100, mx=Math.ceil(top*1.1/st)*st, bw=(W-L-8)/12; let s='';
+  Array.from({length:Math.floor(mx/st)},(_,i)=>(i+1)*st).forEach(v=>{ const y=10+(H-B-10)*(1-v/mx); s+=`<line x1="${L}" x2="${W}" y1="${y}" y2="${y}" stroke="${C.line}" stroke-width="2"/><text x="${L-6}" y="${y+4}" text-anchor="end" font-size="11" fill="${C.muted}" font-family="Nunito">$${v}</text>`; });
   D.monthly.forEach((m,i)=>{ const x=L+i*bw+4, w=(bw-10)/3;
     [[m.el1,C.flat],[m.tou0,C.peak],[m.tou1,C.batt]].forEach(([v,c],j)=>{ const bh=(H-B-10)*v/mx; s+=`<rect x="${x+j*w}" y="${H-B-bh}" width="${w-1}" height="${bh}" fill="${c}" stroke="${C.ink}" stroke-width="1.2"/>`; });
     s+=`<rect class="mhit" data-i="${i}" x="${x-2}" y="0" width="${bw-6}" height="${H-B+4}" fill="transparent" style="cursor:pointer" tabindex="0" role="button" aria-label="${m.m} details"/>`;
@@ -375,7 +499,7 @@ function months(){
   });
   $('monthSvg').innerHTML=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Monthly all-in energy cost">${s}</svg>`;
   document.querySelectorAll('.mhit').forEach(el=>{ const f=()=>{ const m=D.monthly[+el.dataset.i];
-    $('monthPick').innerHTML=`<b>${m.m}:</b> ${m.kwh} kWh used. Flat plan ${money(m.el1)} · time-of-use alone ${money(m.tou0)} (${m.el1-m.tou0>=0?'saves '+money(m.el1-m.tou0):'costs '+money(m.tou0-m.el1)+' more'}) · with one EG4 ${money(m.tou1)} (battery adds ${money(m.tou0-m.tou1)}). One battery ran short on ${m.short} of ${m.wk} weekdays.`; };
+    $('monthPick').innerHTML=`<b>${m.m}:</b> ${m.kwh} kWh used. Flat plan ${money(m.el1)} · time-of-use alone ${money(m.tou0)} (${m.el1-m.tou0>=0?'saves '+money(m.el1-m.tou0):'costs '+money(m.tou0-m.el1)+' more'}) · with ${D.refName} ${money(m.tou1)} (battery adds ${money(m.tou0-m.tou1)}). That battery ran short on ${m.short} of ${m.wk} weekdays.`; };
     el.addEventListener('click',f); el.addEventListener('keydown',e=>{ if(e.key==='Enter'||e.key===' '){e.preventDefault();f();} }); });
 }
 
@@ -397,30 +521,39 @@ function ahead(){
 function cards(){
   $('cards').innerHTML=D.opts.map((o,i)=>`<button class="ocard" aria-pressed="${i===S.opt}" data-i="${i}">
    <h3>${o.name}</h3>
+   <div class="k">Whole-house backup, average use</div><div class="v hero num">≈ ${o.backup} hrs</div>
    <div class="k">Usable storage</div><div class="v num">${o.u} kWh</div>
    <div class="k">Saves per year</div><div class="v num">${money(o.total)}</div>
    <div class="k">Net price</div><div class="v num">${money(o.cost)}</div>
-   <div class="k">Backup at your average use</div><div class="v num">≈ ${o.backup} hrs</div>
-   <div class="k">Peak use covered · payback</div><div class="v num" style="font-size:18px">${o.cover}% · ${o.pay} yrs</div></button>`).join('');
+   <div class="small">Covers ${o.cover}% of your peak use · savings pass the price in about ${o.pay} yrs</div></button>`).join('');
   document.querySelectorAll('.ocard').forEach(b=>b.addEventListener('click',()=>{ setOpt(+b.dataset.i); document.getElementById('day').scrollIntoView({behavior:'smooth'}); }));
 }
 
 function hero(){ const o=D.opts[S.opt], sw=D.switch.summer+D.switch.winter, bt=o.battery.summer+o.battery.winter;
-  $('hTotal').textContent=money(sw+bt); $('hTotalLbl').textContent='a year, with '+o.name; $('hSwitch').textContent=money(sw); $('hBatt').textContent=money(bt); }
+  $('hBack').textContent='≈'+Math.round(o.backup)+' hrs'; $('hBackLbl').textContent='backup for the whole house';
+  $('hTotal').textContent=money(sw+bt); $('hTotalLbl').textContent='saved a year';
+  $('hBatt').textContent=money(bt); $('hSplitLbl').textContent='from the battery, plus '+money(sw)+' from switching plans'; }
 
-function renderAll(){ hero(); clock(); scene(); split(); months(); ahead(); cards(); }
+function renderAll(){ hero(); backup(); clock(); scene(); split(); months(); ahead(); cards(); }
 
 // ---------- controls
 $('cSum').onclick=()=>{S.cSeason='summer';clock()}; $('cWin').onclick=()=>{S.cSeason='winter';clock()};
 $('cWk').onclick=()=>{S.cWeekend=false;clock()}; $('cWe').onclick=()=>{S.cWeekend=true;clock()};
 $('dSum').onclick=()=>{S.dSeason='summer';scene()}; $('dWin').onclick=()=>{S.dSeason='winter';scene()};
 $('dWk').onclick=()=>{S.dWeekend=false;scene()}; $('dWe').onclick=()=>{S.dWeekend=true;scene()};
-$('hour').addEventListener('input',e=>{S.hour=+e.target.value;scene()});
+$('hour').addEventListener('input',e=>{ if(S.out) S.outT=+e.target.value; else S.hour=+e.target.value; scene(); });
+function stopPlay(){ if(S.playing){clearInterval(S.playing);S.playing=null;} $('play').textContent=S.out?'▶ Play the outage':'▶ Play the day'; }
 $('play').onclick=()=>{
-  if(S.playing){clearInterval(S.playing);S.playing=null;$('play').textContent='▶ Play the day';return;}
-  S.hour=0; $('hour').value=0; scene(); $('play').textContent='❚❚ Pause';
-  S.playing=setInterval(()=>{ if(S.hour>=23){clearInterval(S.playing);S.playing=null;$('play').textContent='▶ Play the day';return;} S.hour++; $('hour').value=S.hour; scene(); },700);
+  if(S.playing){ stopPlay(); return; }
+  $('play').textContent='❚❚ Pause';
+  if(S.out){ S.outT=0; scene(); S.playing=setInterval(()=>{ const end=+$('hour').max; if(S.outT>=end){stopPlay();return;} S.outT++; scene(); },450); return; }
+  S.hour=0; $('hour').value=0; scene();
+  S.playing=setInterval(()=>{ if(S.hour>=23){stopPlay();return;} S.hour++; $('hour').value=S.hour; scene(); },700);
 };
+$('outage').onclick=()=>{ stopPlay(); S.out=!S.out; $('outage').setAttribute('aria-pressed',S.out); $('outage').textContent=S.out?'↺ Back to a normal day':'⚡ Power outage';
+  if(S.out){ S.outStart=S.hour; S.outT=0; } else { $('hour').value=S.hour; } stopPlay(); scene(); };
+$('mWhole').onclick=()=>{S.mode='whole';backup();scene()}; $('mEss').onclick=()=>{S.mode='ess';backup();scene()};
+$('ess').addEventListener('input',e=>{S.ess=+e.target.value;backup();scene()});
 heroArt(); renderAll();
 </script>
 </body>

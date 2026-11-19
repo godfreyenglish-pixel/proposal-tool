@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Peter, how long your battery runs your house</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Nunito:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{--sky:#EEF4FB;--card:#FFFFFF;--ink:#1C2B4A;--muted:#5B6782;--line:#D9E2EE;--night:#3D5A9E;--peak:#EE8B2B;--batt:#25A26B;--flat:#8A94A8;--gold:#C9A13B;--warn:#C8452F;
+--display:'Baloo 2','Trebuchet MS',system-ui,sans-serif;--body:'Nunito',system-ui,-apple-system,'Segoe UI',sans-serif}
+*{box-sizing:border-box}
+body{margin:0;background:var(--sky);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.5}
+.wrap{max-width:920px;margin:0 auto;padding:0 18px}
+header{background:var(--ink);color:#fff;padding:34px 0 30px}
+.brand{font-family:var(--display);font-weight:800;letter-spacing:2px;font-size:13px;color:var(--gold)}
+h1{font-family:var(--display);font-weight:800;font-size:34px;line-height:1.1;margin:8px 0 8px}
+header p{margin:0;color:#C9D4E8;max-width:640px}
+section{margin:22px 0}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:20px 22px;box-shadow:0 2px 0 rgba(28,43,74,.04)}
+h2{font-family:var(--display);font-weight:700;font-size:23px;margin:0 0 4px}
+.note{color:var(--muted);font-size:14.5px;margin:0}
+.controls{display:flex;flex-wrap:wrap;gap:14px 26px;align-items:flex-end}
+.ctl label{display:block;font-size:12.5px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+.seg{display:inline-flex;background:var(--sky);border:1px solid var(--line);border-radius:999px;padding:3px}
+.seg button{border:0;background:transparent;font:inherit;font-weight:800;color:var(--muted);padding:7px 15px;border-radius:999px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--ink);color:#fff}
+input[type=range]{width:220px;accent-color:var(--batt)}
+.big{display:flex;flex-wrap:wrap;gap:12px;margin-top:18px}
+.tile{flex:1 1 180px;background:var(--sky);border-radius:14px;padding:12px 14px}
+.tile .k{font-size:12px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;color:var(--muted)}
+.tile .v{font-family:var(--display);font-weight:800;font-size:30px;line-height:1.1;margin-top:4px}
+.tile .s{font-size:13px;color:var(--muted)}
+.tile.good .v{color:var(--batt)} .tile.low .v{color:var(--peak)}
+svg text{font-family:var(--body)}
+.bar{cursor:pointer}
+.bar:hover rect.b{opacity:.85}
+.callout{background:#FFF8E6;border-left:5px solid var(--gold);border-radius:10px;padding:12px 16px;font-size:15px}
+.say{background:var(--sky);border-radius:14px;padding:12px 16px;margin-top:12px;font-size:15.5px}
+.say b{color:var(--ink)}
+.legend{display:flex;gap:16px;flex-wrap:wrap;font-size:13px;color:var(--muted);margin-top:8px}
+.sw{display:inline-block;width:12px;height:12px;border-radius:3px;vertical-align:-1px;margin-right:5px}
+footer{color:var(--muted);font-size:13px;padding:10px 0 40px}
+@media (max-width:560px){h1{font-size:27px}.tile .v{font-size:25px}input[type=range]{width:180px}}
+</style>
+</head>
+<body>
+<header>
+ <div class="wrap">
+  <div class="brand">RIVERTOWN SOLAR · BACKUP GUIDE</div>
+  <h1>Peter, how long would your battery run your house?</h1>
+  <p>Built from 12 months of your own Con Ed usage at 49 Pinecrest Parkway. Pick the number of batteries, choose whole house or just your backup panel, and see how long the lights stay on in every month of the year.</p>
+ </div>
+</header>
+
+<main class="wrap">
+ <section class="card">
+  <div class="controls">
+   <div class="ctl"><label>Batteries</label>
+    <div class="seg" role="group" aria-label="Batteries"><button id="b1" aria-pressed="true">1 × EG4 16 kWh</button><button id="b2" aria-pressed="false">2 × EG4 16 kWh</button></div></div>
+   <div class="ctl"><label>What stays on</label>
+    <div class="seg" role="group" aria-label="Circuits"><button id="mWhole" aria-pressed="true">Whole house</button><button id="mEss" aria-pressed="false">Backup panel only</button></div></div>
+   <div class="ctl" id="essCtl" style="display:none"><label for="ess">Essentials draw: <span id="essV"></span></label>
+    <input id="ess" type="range" min="0.25" max="0.70" step="0.05" value="0.40"></div>
+  </div>
+  <div class="big">
+   <div class="tile"><div class="k">Year-round average</div><div class="v" id="tAvg"></div><div class="s">at your average use</div></div>
+   <div class="tile low"><div class="k" id="kMin">Shortest month</div><div class="v" id="tMin"></div><div class="s" id="tMinS"></div></div>
+   <div class="tile good"><div class="k" id="kMax">Longest month</div><div class="v" id="tMax"></div><div class="s" id="tMaxS"></div></div>
+  </div>
+ </section>
+
+ <section class="card">
+  <h2>Backup time, month by month</h2>
+  <p class="note">Each bar is how long a fully charged battery lasts at that month's average draw. Summer runs shorter because the AC is working. Tap a month to test an outage below.</p>
+  <svg id="chart" viewBox="0 0 860 300" width="100%" role="img" aria-label="Backup hours by month"></svg>
+  <div class="legend"><span><span class="sw" style="background:var(--batt)"></span>A day or more (24+ hrs)</span><span><span class="sw" style="background:var(--night)"></span>12 to 24 hrs</span><span><span class="sw" style="background:var(--peak)"></span>Under 12 hrs</span></div>
+ </section>
+
+ <section class="card">
+  <h2>Test an outage</h2>
+  <p class="note">Your house doesn't draw power evenly. Evenings run heavy, overnight runs light. Pick when the power goes out and watch the battery carry the house hour by hour.</p>
+  <div class="controls" style="margin-top:12px">
+   <div class="ctl"><label for="mon">Month</label><select id="mon" style="font:inherit;font-weight:700;padding:7px 10px;border-radius:10px;border:1px solid var(--line)"></select></div>
+   <div class="ctl"><label for="st">Power goes out at: <span id="stV"></span></label><input id="st" type="range" min="0" max="23" step="1" value="17"></div>
+  </div>
+  <svg id="sim" viewBox="0 0 860 260" width="100%" role="img" aria-label="Battery charge during the outage"></svg>
+  <div class="say" id="say"></div>
+ </section>
+
+ <section class="callout">
+  <b>How your system is set up:</b> your agreement includes a backup panel. During an outage it powers the circuits we move onto that panel (fridge, lights, internet, heat, the outlets you pick), not the whole house. Whole-house numbers are here so you can compare. Flip to "Backup panel only" to see what your setup actually does.
+ </section>
+
+ <footer>
+  Estimates from your Con Ed interval data (Nov 2025 to Oct 2026, 5,912 kWh). Assumes the battery is full when the outage starts, no solar recharging, and 12.8 kWh usable per EG4 16 kWh battery. Big loads running together (AC, dryer, oven, well pump) shorten these times. Backup panel draw is an estimate you can adjust. Questions: Godfrey English, Rivertown Solar, (347) 395-7807.
+ </footer>
+</main>
+
+<script>
+const MONTHS=[["Jan",462,31],["Feb",403,28],["Mar",379,31],["Apr",340,30],["May",461,31],["Jun",536,30],["Jul",910,31],["Aug",739,31],["Sep",375,30],["Oct",360,31],["Nov",413,30],["Dec",534,31]];
+const SUMMER=new Set(["May","Jun","Jul","Aug","Sep"]);
+const PROF={summer:[0.502,0.497,0.492,0.472,0.444,0.598,0.674,0.898,0.628,0.723,0.773,0.748,0.87,0.982,1.041,1.225,1.718,1.786,1.323,1.195,1.059,0.935,0.76,0.587],
+ winter:[0.288,0.279,0.339,0.365,0.376,0.392,0.433,0.868,0.456,0.384,0.344,0.348,0.538,0.504,0.508,0.566,0.911,1.105,0.852,0.907,1.015,0.848,0.604,0.4]};
+const USABLE=12.8, ANNUAL=5912, CAP=96;
+const S={n:1,mode:"whole",ess:0.40,mon:6,st:17};
+const $=id=>document.getElementById(id);
+const fmtH=h=>h>=CAP?CAP+"+ hrs":(h>=10?Math.round(h):h.toFixed(1))+" hrs";
+const hr=h=>{h=((h%24)+24)%24;const ap=h<12?"AM":"PM";const x=h%12===0?12:h%12;return x+" "+ap};
+function avgKw(i){const[m,k,d]=MONTHS[i];return k/(d*24)}
+function drawKw(i){return S.mode==="whole"?avgKw(i):S.ess}
+function hoursFlat(i){return Math.min(CAP,USABLE*S.n/drawKw(i))}
+function shape(i){const p=SUMMER.has(MONTHS[i][0])?PROF.summer:PROF.winter;const mean=p.reduce((a,b)=>a+b,0)/24;const target=drawKw(i);return p.map(x=>x*target/mean)}
+function simulate(i,st){const L=shape(i);let e=USABLE*S.n;const pts=[[0,100]];let t=0;
+ while(t<CAP){const kw=L[(st+t)%24];if(e<=kw){t+=e/kw;e=0;pts.push([t,0]);break}e-=kw;t+=1;pts.push([t,100*e/(USABLE*S.n)])}
+ return {hours:e>0?CAP:t,pts}}
+function color(h){return h>=24?"var(--batt)":h>=12?"var(--night)":"var(--peak)"}
+
+function tiles(){const hs=MONTHS.map((_,i)=>hoursFlat(i));
+ const avgDraw=S.mode==="whole"?ANNUAL/8760:S.ess;
+ $("tAvg").textContent=fmtH(Math.min(CAP,USABLE*S.n/avgDraw));
+ $("kMin").textContent=S.mode==="ess"?"Shortest, by start time":"Shortest month";$("kMax").textContent=S.mode==="ess"?"Longest, by start time":"Longest month";
+ if(S.mode==="ess"){const rs=[...Array(24).keys()].map(h=>simulate(S.mon,h).hours);const a=Math.min(...rs),b=Math.max(...rs);
+  $("tMin").textContent=fmtH(a);$("tMinS").textContent="outage at "+hr(rs.indexOf(a))+" ("+MONTHS[S.mon][0]+")";
+  $("tMax").textContent=fmtH(b);$("tMaxS").textContent="outage at "+hr(rs.indexOf(b))+" ("+MONTHS[S.mon][0]+")";return}
+ const mn=Math.min(...hs),mx=Math.max(...hs);
+ $("tMin").textContent=fmtH(mn);$("tMinS").textContent=MONTHS[hs.indexOf(mn)][0]+(S.mode==="whole"?", AC season":"");
+ $("tMax").textContent=fmtH(mx);$("tMaxS").textContent=S.mode==="whole"?MONTHS[hs.indexOf(mx)][0]+", mild weather":"steady essentials draw";}
+
+function chart(){const W=860,H=300,L=46,R=10,T=18,B=40;const hs=MONTHS.map((_,i)=>hoursFlat(i));
+ const top=Math.max(30,Math.ceil(Math.max(...hs)/12)*12);const y=v=>T+(H-T-B)*(1-v/top);const bw=(W-L-R)/12;
+ let s="";for(let g=0;g<=top;g+=12){s+=`<line x1="${L}" x2="${W-R}" y1="${y(g)}" y2="${y(g)}" stroke="#D9E2EE"/><text x="${L-8}" y="${y(g)+4}" text-anchor="end" font-size="12" fill="#5B6782">${g}h</text>`}
+ s+=`<line x1="${L}" x2="${W-R}" y1="${y(24)}" y2="${y(24)}" stroke="#25A26B" stroke-dasharray="5 4"/><text x="${W-R}" y="${y(24)-5}" text-anchor="end" font-size="12" font-weight="800" fill="#25A26B">1 full day</text>`;
+ hs.forEach((h,i)=>{const x=L+i*bw+bw*0.15,w=bw*0.7,sel=i===S.mon;
+  s+=`<g class="bar" data-i="${i}"><rect x="${L+i*bw}" y="${T}" width="${bw}" height="${H-T-B}" fill="${sel?'#EEF4FB':'transparent'}"/><rect class="b" x="${x}" y="${y(h)}" width="${w}" height="${y(0)-y(h)}" rx="6" fill="${color(h)}" ${sel?'stroke="#1C2B4A" stroke-width="2.5"':''}/>
+  <text x="${x+w/2}" y="${y(h)-6}" text-anchor="middle" font-size="12.5" font-weight="800" fill="#1C2B4A">${h>=CAP?CAP+'+':Math.round(h)}</text>
+  <text x="${x+w/2}" y="${H-B+18}" text-anchor="middle" font-size="13" font-weight="${sel?800:600}" fill="#1C2B4A">${MONTHS[i][0]}</text></g>`});
+ $("chart").innerHTML=s;
+ $("chart").querySelectorAll(".bar").forEach(g=>g.onclick=()=>{S.mon=+g.dataset.i;$("mon").value=S.mon;render()});}
+
+function sim(){const W=860,H=260,L=46,R=14,T=16,B=38;const r=simulate(S.mon,S.st);const span=Math.min(CAP,Math.max(24,Math.ceil(r.hours/6)*6+6));
+ const x=t=>L+(W-L-R)*t/span,y=p=>T+(H-T-B)*(1-p/100);let s="";
+ for(let p=0;p<=100;p+=25)s+=`<line x1="${L}" x2="${W-R}" y1="${y(p)}" y2="${y(p)}" stroke="#D9E2EE"/><text x="${L-8}" y="${y(p)+4}" text-anchor="end" font-size="12" fill="#5B6782">${p}%</text>`;
+ const step=span<=36?3:span<=60?6:12;
+ for(let t=0;t<=span;t+=step){const night=((S.st+t)%24)<7||((S.st+t)%24)>=21;s+=`<text x="${x(t)}" y="${H-B+18}" text-anchor="middle" font-size="12" fill="#5B6782">${hr(S.st+t)}</text>`}
+ for(let t=0;t<span;t++){const hh=(S.st+t)%24;if(hh>=21||hh<7)s+=`<rect x="${x(t)}" y="${T}" width="${x(t+1)-x(t)}" height="${H-T-B}" fill="#3D5A9E" opacity=".06"/>`}
+ const d=r.pts.map((p,k)=>(k?"L":"M")+x(p[0]).toFixed(1)+" "+y(p[1]).toFixed(1)).join(" ");
+ s+=`<path d="${d} L${x(r.pts[r.pts.length-1][0]).toFixed(1)} ${y(0)} L${x(0)} ${y(0)} Z" fill="${color(r.hours)}" opacity=".15"/><path d="${d}" fill="none" stroke="${color(r.hours)}" stroke-width="3.5" stroke-linejoin="round"/>`;
+ if(r.hours<CAP){s+=`<circle cx="${x(r.hours)}" cy="${y(0)}" r="6" fill="#C8452F"/><text x="${Math.min(x(r.hours),W-R-4)}" y="${y(0)-12}" text-anchor="${x(r.hours)>W-150?'end':'middle'}" font-size="13" font-weight="800" fill="#C8452F">Empty around ${hr(Math.round(S.st+r.hours))}</text>`}
+ $("sim").innerHTML=s;
+ const m=MONTHS[S.mon][0],what=S.mode==="whole"?"your whole house":"your backup panel",nb=S.n===1?"One battery":"Two batteries",vb=S.n===1?"carries":"carry";
+ let line;
+ if(r.hours>=CAP)line=`<b>${nb} would still be going after ${CAP} hours</b> on ${what} in ${m}. That's longer than almost any outage you'll see.`;
+ else if(r.hours>=24)line=`<b>${nb} ${vb} ${what} for about ${fmtH(r.hours)}</b> if the power goes out at ${hr(S.st)} in ${m}. That's a full day and night covered.`;
+ else line=`<b>${nb} ${vb} ${what} for about ${fmtH(r.hours)}</b> if the power goes out at ${hr(S.st)} in ${m}, running out around ${hr(Math.round(S.st+r.hours))}.${S.mode==="whole"?" Switching to just your backup panel stretches that a lot.":""}`;
+ $("say").innerHTML=line+` <span style="color:#5B6782">(Shaded hours are overnight, when the house draws the least.)</span>`;}
+
+function render(){["b1","b2"].forEach((id,k)=>$(id).setAttribute("aria-pressed",S.n===k+1));
+ $("mWhole").setAttribute("aria-pressed",S.mode==="whole");$("mEss").setAttribute("aria-pressed",S.mode==="ess");
+ $("essCtl").style.display=S.mode==="ess"?"":"none";$("essV").textContent=S.ess.toFixed(2)+" kW";$("stV").textContent=hr(S.st);
+ tiles();chart();sim();}
+$("mon").innerHTML=MONTHS.map((m,i)=>`<option value="${i}">${m[0]}</option>`).join("");$("mon").value=S.mon;
+$("b1").onclick=()=>{S.n=1;render()};$("b2").onclick=()=>{S.n=2;render()};
+$("mWhole").onclick=()=>{S.mode="whole";render()};$("mEss").onclick=()=>{S.mode="ess";render()};
+$("ess").oninput=e=>{S.ess=+e.target.value;render()};$("st").oninput=e=>{S.st=+e.target.value;render()};
+$("mon").onchange=e=>{S.mon=+e.target.value;render()};
+render();
+</script>
+</body>
+</html>

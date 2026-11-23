@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Abreu Home Energy Profile</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&family=Nunito:wght@400;700&display=swap" rel="stylesheet">
+<style>
+/* VOICE: friendly, plain, confident; a neighbor who reads bills for a living
+   IDEA: a home energy report card, one chapter per finding
+   PICTURE: cartoon house with a thermometer and a sun, then a season bar chart
+   COLOUR and TYPE: utility orange lead, winter blue, shoulder teal; Fredoka + Nunito
+   LAYOUT: hero card, numbered chapters in one calm column, checklist, next step */
+:root{color-scheme:light dark;--bg:light-dark(#fffaf4,#17130f);--card:light-dark(#ffffff,#221c16);--ink:light-dark(#22201c,#f3ede4);--mute:light-dark(#6a645b,#b4ab9e);--line:light-dark(#efe4d6,#3a3128);--or:light-dark(#c8641a,#cf7a2e);--bl:light-dark(#2b6cb0,#5596dc);--te:light-dark(#13937c,#1f9a86);--hero:light-dark(#ff8a2b,#8a3e0a)}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16.5px/1.6 Nunito,system-ui,sans-serif;overflow-x:clip}
+h1,h2,h3{font-family:Fredoka,Nunito,sans-serif;font-weight:600;line-height:1.1;text-wrap:balance;margin:0 0 .4em}
+h1{font-size:clamp(32px,5vw,50px)}h2{font-size:clamp(24px,3.2vw,32px)}h3{font-size:19px}
+.hero{background:var(--hero);color:#fff;padding:clamp(28px,4vw,56px) max(5vw,16px)}
+.hero .in{max-width:1100px;margin:auto;display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:32px;align-items:center}
+.hero p{font-size:18px;max-width:34em}
+.tag{display:inline-block;background:rgba(0,0,0,.18);border-radius:99px;padding:4px 14px;font-size:14px;margin-bottom:14px}
+.stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:20px}
+.stat{background:rgba(255,255,255,.16);border-radius:16px;padding:12px 16px}
+.stat b{display:block;font:600 clamp(24px,3vw,32px)/1.1 Fredoka,sans-serif;white-space:nowrap}
+.stat span{font-size:14px}
+.band{padding:clamp(28px,4vw,56px) max(5vw,16px)}
+.wrap{max-width:860px;margin:auto}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px}
+.chips a{border:1.5px solid var(--line);border-radius:99px;padding:8px 14px;color:var(--ink);text-decoration:none;font-size:14px;background:var(--card)}
+.chips a:focus-visible{outline:3px solid var(--or)}
+.ch{background:var(--card);border:1.5px solid var(--line);border-radius:22px;padding:clamp(20px,3vw,34px);margin-bottom:22px}
+.num{display:inline-grid;place-items:center;width:34px;height:34px;border-radius:50%;background:var(--or);color:#fff;font:600 17px Fredoka,sans-serif;margin-bottom:10px}
+.fig{position:relative;height:320px;margin:10px 0 6px}.fig>svg{position:absolute;inset:0;width:100%;height:100%}
+.legend{display:flex;flex-wrap:wrap;gap:16px;font-size:14px;color:var(--mute)}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+.tip{position:absolute;pointer-events:none;background:var(--ink);color:var(--bg);font-size:14px;padding:8px 12px;border-radius:10px;opacity:0;transition:opacity .12s;white-space:nowrap}
+.note{background:light-dark(#fff3e6,#2d2218);border-radius:14px;padding:14px 18px;margin-top:14px}
+.mute{color:var(--mute);font-size:14px}
+table{width:100%;border-collapse:collapse;font-size:15px}td,th{padding:8px 6px;border-bottom:1px solid var(--line);text-align:left}td.r,th.r{text-align:right;white-space:nowrap}
+details summary{cursor:pointer;font-weight:700;min-height:44px;display:flex;align-items:center}
+ul.check{list-style:none;padding:0;margin:0}ul.check li{padding:10px 0 10px 36px;position:relative;border-bottom:1px solid var(--line)}
+ul.check li:before{content:"";position:absolute;left:0;top:12px;width:22px;height:22px;border:2px solid var(--or);border-radius:6px}
+.two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.box{border:1.5px dashed var(--line);border-radius:16px;padding:16px}
+.cta{background:var(--or);color:#fff;border-radius:22px;padding:clamp(22px,3vw,34px)}
+@media(max-width:700px){.hero .in{grid-template-columns:1fr}.two{grid-template-columns:1fr}}
+@media(prefers-reduced-motion:no-preference){.sun{animation:spin 30s linear infinite;transform-origin:330px 70px}@keyframes spin{to{transform:rotate(360deg)}}}
+</style>
+</head>
+<body>
+<header class="hero"><div class="in">
+<div>
+<span class="tag">Energy Profile · Elmwood Park, NJ · PSE&amp;G</span>
+<h1>Randy, your home's big month is winter, not summer.</h1>
+<p>I read 13 months of your PSE&amp;G bills. Your house uses about 8,600 kWh a year, and December through February alone is over a third of it. Here's what that tells us.</p>
+<div class="stats">
+<div class="stat"><b>~8,600 kWh</b><span>last 12 months</span></div>
+<div class="stat"><b>~$2,350</b><span>electric per year, before credits</span></div>
+<div class="stat"><b>37.5 kWh</b><span>a day in February, your peak</span></div>
+<div class="stat"><b>12.6 kWh</b><span>a day in October, your low</span></div>
+</div>
+</div>
+<svg viewBox="0 0 420 340" role="img" aria-label="Cartoon house with a thermometer and the sun">
+<g class="sun"><circle cx="330" cy="70" r="34" fill="#ffd166"/><g stroke="#ffd166" stroke-width="6" stroke-linecap="round">
+<line x1="330" y1="16" x2="330" y2="4"/><line x1="330" y1="124" x2="330" y2="136"/><line x1="276" y1="70" x2="264" y2="70"/><line x1="384" y1="70" x2="396" y2="70"/>
+<line x1="292" y1="32" x2="284" y2="24"/><line x1="368" y1="108" x2="376" y2="116"/><line x1="368" y1="32" x2="376" y2="24"/><line x1="292" y1="108" x2="284" y2="116"/></g></g>
+<ellipse cx="190" cy="318" rx="170" ry="14" fill="rgba(0,0,0,.18)"/>
+<rect x="60" y="160" width="240" height="155" rx="10" fill="#fff4e8"/>
+<rect x="60" y="160" width="240" height="22" fill="#f3dcc4"/>
+<path d="M40 172 L180 70 L320 172 Z" fill="#7a3510"/><path d="M180 70 L320 172 L300 172 L180 86 Z" fill="#5c270b"/>
+<rect x="230" y="92" width="26" height="46" fill="#7a3510"/>
+<rect x="85" y="200" width="56" height="50" rx="6" fill="#9cc9f5"/><rect x="85" y="200" width="56" height="10" fill="#cfe5fb"/>
+<rect x="220" y="200" width="56" height="50" rx="6" fill="#9cc9f5"/><rect x="220" y="200" width="56" height="10" fill="#cfe5fb"/>
+<rect x="155" y="235" width="50" height="80" rx="6" fill="#c8641a"/><circle cx="195" cy="278" r="4" fill="#ffd166"/>
+<rect x="352" y="170" width="22" height="120" rx="11" fill="#fff"/><rect x="358" y="200" width="10" height="84" rx="5" fill="#2b6cb0"/><circle cx="363" cy="292" r="18" fill="#2b6cb0"/><circle cx="363" cy="292" r="18" fill="none" stroke="#fff" stroke-width="5"/>
+<text x="345" y="160" fill="#fff" font-family="Fredoka,Nunito,sans-serif" font-size="15">cold = kWh</text>
+</svg>
+</div></header>
+
+<main class="band"><div class="wrap">
+<nav class="chips" aria-label="Chapters"><a href="#seasons">1 Seasons</a><a href="#winter">2 Winter</a><a href="#summer">3 Summer</a><a href="#costs">4 Costs</a><a href="#lately">5 Lately</a><a href="#next">6 Next step</a></nav>
+<p class="mute">Read from your PSE&amp;G bills and My Account charts (Sep 2025 to Nov 2026). Monthly totals are read off the usage charts, so treat them as close, not exact.</p>
+
+<section class="ch" id="seasons"><span class="num">1</span>
+<h2>Your year in three seasons</h2>
+<p>Each bar is how much your home used on an average day that billing month. Hover or tap a bar for the details.</p>
+<div class="legend"><span><i style="background:var(--bl)"></i>Winter (Dec to Feb)</span><span><i style="background:var(--or)"></i>Summer (Jun to Sep)</span><span><i style="background:var(--te)"></i>Spring and fall</span></div>
+<div class="fig" id="fig"><svg id="chart" aria-label="Average daily kWh by month, Oct 2025 to Oct 2026"></svg><div class="tip" id="tip"></div></div>
+<details><summary>Show the numbers</summary><table><thead><tr><th>Bill month</th><th class="r">kWh a day</th><th class="r">About kWh</th></tr></thead><tbody id="tbody"></tbody></table></details>
+<div class="note"><b>The read:</b> spring and fall settle around 17 kWh a day. That's your baseline. Winter nearly doubles it, summer adds about 60%.</div>
+</section>
+
+<section class="ch" id="winter"><span class="num">2</span>
+<h2>Something electric is heating this house</h2>
+<p>December through February used roughly <b>3,050 kWh</b>, about 35% of the whole year in three months. On the coldest days in late January and early February 2026 your daily use jumped past <b>80 kWh</b>, right when outdoor temps dropped near single digits.</p>
+<p>You mentioned the gas furnace just kicked on. Its blower fan runs on electric, but that's usually a few kWh a day, not the 15 to 20 extra we saw last winter. Electric use that tracks the thermometer this closely usually means one of these is pulling hard:</p>
+<div class="two">
+<div class="box"><h3>Space heaters</h3><p>Two or three running in bedrooms can add 20+ kWh a day.</p></div>
+<div class="box"><h3>Heat pump or electric baseboard</h3><p>Heating part of the house (a finished basement, an addition) on electric.</p></div>
+</div>
+<p class="mute">This matters for sizing. A solar system built only off your summer bills would come up short in the months you use the most.</p>
+</section>
+
+<section class="ch" id="summer"><span class="num">3</span>
+<h2>Summer is about AC, and PSE&amp;G charges more for it</h2>
+<p>July and August ran about <b>29 to 30 kWh a day</b>, roughly 12 kWh above baseline. That's your cooling.</p>
+<p>From June to September PSE&amp;G uses a two-step rate: once you pass 600 kWh in a bill, every extra kWh costs more on both delivery and supply. Your September bill hit 631 kWh, so the last 31 kWh were on the higher step. July and August were well past it.</p>
+</section>
+
+<section class="ch" id="costs"><span class="num">4</span>
+<h2>What a kWh actually costs you</h2>
+<table class="stack"><thead><tr><th>From your September bill (summer)</th><th class="r">First 600 kWh</th><th class="r">Above 600</th></tr></thead><tbody>
+<tr><td>Delivery</td><td class="r">9.01¢</td><td class="r">9.42¢</td></tr>
+<tr><td>Supply (PSE&amp;G)</td><td class="r">19.55¢</td><td class="r">20.52¢</td></tr>
+<tr><td><b>Total per kWh</b></td><td class="r"><b>28.6¢</b></td><td class="r"><b>29.9¢</b></td></tr>
+</tbody></table>
+<p>Plus a <b>$6 monthly service charge</b>. Your October bill (non-summer) came to about <b>25¢ a kWh</b> after the service charge, or 27¢ all in. Across the year that puts electric at roughly <b>$2,350</b>, before one-time credits like the $25 NJ universal bill credit.</p>
+<p class="mute">PSE&amp;G changed both delivery and supply rates on October 1, 2026. Rates move; the pattern doesn't.</p>
+</section>
+
+<section class="ch" id="lately"><span class="num">5</span>
+<h2>Your use dropped hard this fall</h2>
+<p>October 2026 came in at <b>365 kWh</b>, 26.6% below October 2025. Mid-November is holding the same pace, about <b>13 kWh a day</b>. That's the lowest stretch in the whole record.</p>
+<div class="note"><b>Worth a quick answer:</b> you said the AC has barely run the last two months, but October 2025 was a mild month too, so AC alone doesn't explain a 26.6% drop. New appliance, fewer people home, something unplugged? If it's permanent, your real baseline is lower than last year shows, and the plan should reflect that.</div>
+</section>
+
+<section class="ch"><span class="num">i</span>
+<h2>Market context, not a quote</h2>
+<p>You pay roughly 25 to 30¢ for every kWh you buy from PSE&amp;G today. The plan review puts what solar would produce for your roof next to that number, side by side.</p>
+<p class="mute">Deliberately not in here: system size, price, or payback. Those come from your roof design and your full data, not from bill screenshots.</p>
+</section>
+
+<section class="ch"><span class="num">✓</span>
+<h2>What would sharpen this</h2>
+<ul class="check">
+<li><b>Green Button file.</b> In PSE&amp;G My Account, open your usage page, choose <b>Data</b>, and download your electric usage. That gives us hour by hour, so we can see the peak hours and the always-on load.</li>
+<li><b>One recent gas bill.</b> Tells us whether gas or electric is doing the heating.</li>
+<li><b>Quick questions:</b> any space heaters or electric heat? Planning an EV, heat pump, or addition? What changed this fall?</li>
+</ul>
+</section>
+
+<section class="cta" id="next">
+<h2>Next step: a 20-minute plan review</h2>
+<p>We go over your roof layout and these numbers together on a screen share, and you see exactly what a system would cover, winter included.</p>
+<p>Godfrey · AskGodfreyNYC</p>
+</section>
+</div></main>
+
+<script>
+{
+const D=[["Oct '25",16.0,31,"s"],["Nov '25",17.0,30,"s"],["Dec '25",32.0,31,"w"],["Jan '26",31.5,31,"w"],["Feb '26",37.5,29,"w"],["Mar '26",19.7,30,"s"],["Apr '26",18.2,30,"s"],["May '26",17.6,31,"s"],["Jun '26",23.3,30,"u"],["Jul '26",30.0,29,"u"],["Aug '26",29.0,28,"u"],["Sep '26",19.7,32,"u"],["Oct '26",12.6,29,"s"]];
+const C={w:"var(--bl)",u:"var(--or)",s:"var(--te)"},N={w:"Winter",u:"Summer",s:"Spring/fall"};
+const s=document.getElementById("chart"),tip=document.getElementById("tip"),fig=document.getElementById("fig");
+document.getElementById("tbody").innerHTML=D.map(d=>`<tr><td>${d[0]}</td><td class="r">${d[1].toFixed(1)}</td><td class="r">${Math.round(d[1]*d[2]).toLocaleString()}</td></tr>`).join("");
+const draw=()=>{const W=s.clientWidth,H=s.clientHeight,small=W<520,L=small?28:40,B=28,T=10,max=40,pw=W-L-8,ph=H-B-T,bw=pw/D.length,g=Math.max(2,bw*.22);
+let o="";for(const v of [0,10,20,30,40]){const y=T+ph-(v/max)*ph;o+=`<line x1="${L}" x2="${W-8}" y1="${y}" y2="${y}" stroke="var(--line)"/><text x="${L-6}" y="${y+4}" text-anchor="end" font-size="12" fill="var(--mute)">${v}</text>`}
+D.forEach((d,i)=>{const h=(d[1]/max)*ph,x=L+i*bw+g/2,y=T+ph-h,w=bw-g;o+=`<path d="M${x} ${T+ph}V${y+4}q0-4 4-4h${w-8}q4 0 4 4V${T+ph}Z" fill="${C[d[3]]}"/><rect data-i="${i}" x="${L+i*bw}" y="${T}" width="${bw}" height="${ph}" fill="transparent"/>`;
+if(!small||i%2==0)o+=`<text x="${x+w/2}" y="${H-8}" text-anchor="middle" font-size="12" fill="var(--mute)">${small?d[0].slice(0,3):d[0]}</text>`});
+o+=`<text x="${L+4*bw+bw/2}" y="${T+ph-(37.5/max)*ph-6}" text-anchor="middle" font-size="12" font-weight="700" fill="var(--ink)">37.5</text>`;
+s.innerHTML=o};
+const ro=new ResizeObserver(draw);ro.observe(s);
+const show=e=>{const t=e.target.closest("rect[data-i]");if(!t){tip.style.opacity=0;return}const d=D[+t.dataset.i],r=fig.getBoundingClientRect(),bx=t.getBoundingClientRect();
+tip.innerHTML=`<b>${d[0]}</b> · ${N[d[3]]}<br>${d[1].toFixed(1)} kWh a day · about ${Math.round(d[1]*d[2]).toLocaleString()} kWh`;tip.style.opacity=1;
+let x=bx.left-r.left+bx.width/2-tip.offsetWidth/2;x=Math.max(0,Math.min(x,r.width-tip.offsetWidth));tip.style.left=x+"px";tip.style.top="0px"};
+s.addEventListener("pointermove",show);s.addEventListener("pointerdown",show);s.addEventListener("pointerleave",()=>tip.style.opacity=0);
+}
+</script>
+</body>
+</html>
